@@ -10,10 +10,10 @@ import user_service.serviceInterface.IUserAiService;
 @RequiredArgsConstructor
 public class UserAiService implements IUserAiService {
 
-    @Value("classpath:prompts/system/salon-system.st")
-    private Resource systemPromptResource;
-    @Value("classpath:prompts/user/salon-recommendation.st")
-    private Resource userPromptResource;
+//    @Value("classpath:prompts/system/salon-system.st")
+//    private Resource systemPromptResource;
+//    @Value("classpath:prompts/user/salon-recommendation.st")
+//    private Resource userPromptResource;
 
 
 

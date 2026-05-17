@@ -16,7 +16,6 @@ D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\m
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\file\LocalFileStorageService.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\filter\JwtFilter.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\globalException\CustomAccessDeniedHandler.java
-D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\globalException\GlobalExceptionController.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\mapper\UserMapper.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\model\CustomUserDetails.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\model\User.java

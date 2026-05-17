@@ -1,4 +1,4 @@
-package user_service.config;
+package category_service.config;
 
 import com.umar.exceptions.user.exceptionController.GlobalException;
 import org.springframework.context.annotation.Bean;
@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Import;
 public class ExceptionConfig {
 
     @Bean
-    public GlobalException userException(){
+    public GlobalException categoryException(){
         return new GlobalException();
     }
 }

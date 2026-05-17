@@ -79,7 +79,7 @@ public class UserController {
     public ResponseEntity<UserValidateResponse> validateUser(HttpServletRequest request){
         String accessToken = this.getAccessTokenFromRequestHeader(request);
         UserValidateResponse response = userService.validateUser(accessToken);
-        return ResponseEntity.status(HttpStatus.FOUND).body(response);
+        return ResponseEntity.ok(response);
     }
 
 

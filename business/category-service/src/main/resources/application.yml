@@ -1,0 +1,45 @@
+server:
+  port: 5001
+
+spring:
+  application:
+    name: CATEGORY-SERVICE
+
+  datasource:
+    url: jdbc:mysql://localhost:6003/app_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: app_user
+    password: app_password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+
+
+  cloud:
+     openfeign:
+       client:
+         config:
+            CATEGORY-SERVICE:
+              connectTimeout: 5000
+              readTimeout: 10000
+
+eureka:
+  instance:
+    prefer-ip-address : true
+  client:
+    fetch-registry : true
+    register-with-eureka : true
+    service-url:
+      defaultZone : http://localhost:4001/eureka/
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: http://eureka-server:4001/eureka/
+#    register-with-eureka: true
+#    fetch-registry: true
+#
+#  instance:
+#    prefer-ip-address: true

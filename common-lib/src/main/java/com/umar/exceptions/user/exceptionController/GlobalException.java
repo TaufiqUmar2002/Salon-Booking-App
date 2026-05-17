@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestControllerAdvice
-public class GlobalUserException {
+public class GlobalException {
     
     @ExceptionHandler(ResourceAlreadyExistsException.class)
     public ResponseEntity<Map<String,String>> handleUserExists(ResourceAlreadyExistsException exception){
