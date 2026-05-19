@@ -1,0 +1,28 @@
+server.port: 9001
+
+
+
+spring:
+  application:
+    name: API-GATEWAY
+
+
+eureka:
+  instance:
+    prefer-ip-address : true
+  client:
+    fetch-registry : true
+    register-with-eureka : true
+    service-url:
+      defaultZone : http://localhost:4001/eureka/
+
+logging:
+  level:
+    org.springframework.cache: TRACE
+
+
+#
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: http://localhost:4001/eureka/

@@ -1,0 +1,27 @@
+server:
+  port: 4002
+
+spring:
+  application:
+    name: CONFIG-SERVER
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:4001/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 10
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
