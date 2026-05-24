@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import user_service.model.CustomUserDetails;
 import user_service.service.UserService;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -35,6 +37,13 @@ public class UserController {
     public ResponseEntity<UserProfileResponse> viewUserProfile(@PathVariable("id")Long id){
         UserProfileResponse response = userService.getUserProfile(id);
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Page<UserProfileResponse>> getAllUsersForAdmin(@RequestParam(name = "page",required = false) int page,@RequestParam(name = "size",required = false) int size){
+        Page<UserProfileResponse> userProfileResponseList = this.userService.getAllUsersForAdmin(page,size);
+        return ResponseEntity.status(HttpStatus.OK).body(userProfileResponseList);
     }
 
     @PutMapping("/profile/{id}")

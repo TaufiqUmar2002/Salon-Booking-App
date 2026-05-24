@@ -3,6 +3,7 @@ package user_service.serviceInterface;
 
 
 import com.umar.payload.request.user.*;
+import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -15,4 +16,5 @@ public interface IUserService {
     void logoutUser(Long userId,LogoutRequest request,String accessToken);
     void deleteUser(Long id,String reason,String accessToken);
     UserValidateResponse validateUser(String accessToken);
+    Page<UserProfileResponse> getAllUsersForAdmin(int page, int size);
 }

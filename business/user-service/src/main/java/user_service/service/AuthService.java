@@ -89,14 +89,14 @@ public class AuthService implements IAuthService {
         Optional<User> userOptional = userRepository.findByEmail(email);
         if(userOptional.isEmpty() || !passwordEncoder.matches(password,userOptional.get().getPasswordHash())){
             recordFailedAttempt(ipAddress);
-            throw new ApiException(HttpStatus.NOT_FOUND,"INVALID_CREDENTIALS","'Invalid email or password'");
+            throw new ApiException(HttpStatus.NOT_FOUND,"INVALID_CREDENTIALS","'Invalid email or password");
         }
         User user = userOptional.get();
         if(!user.getIsEmailVerified()){
             throw new ApiException(HttpStatus.BAD_REQUEST,"EMAIL_NOT_VERIFIED","Please verify your email before logging in");
         }
         if(!user.getIsActive()){
-            throw new ApiException(HttpStatus.FORBIDDEN,"ACCOUNT_DEACTIVATED","'Your account has been deactivated. Contact support");
+            throw new ApiException(HttpStatus.FORBIDDEN,"ACCOUNT_DEACTIVATED","Your account has been deactivated. Contact support");
         }
         clearFailedAttempts(ipAddress);
         String jwtRefreshToken = user.getRefreshToken();
@@ -174,7 +174,7 @@ public class AuthService implements IAuthService {
 
     @Override
     public void resetPassword(ResetPasswordRequest request) {
-        VerificationToken token = verificationService.getVerificationToken(request.getToken());
+        VerificationToken token = verificationService.getVerificationToken(request.getTempToken());
         verificationService.isTokenExpired(token);
         String hashedPassword = passwordEncoder.encode(request.getNewPassword());
         if(passwordEncoder.matches(request.getNewPassword(),token.getUser().getPasswordHash())){

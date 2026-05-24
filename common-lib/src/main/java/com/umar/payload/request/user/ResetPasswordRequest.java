@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class ResetPasswordRequest {
-    private String token;
+    private String tempToken;
     @Size(max = 8,min = 8)
     private String newPassword;
 }
