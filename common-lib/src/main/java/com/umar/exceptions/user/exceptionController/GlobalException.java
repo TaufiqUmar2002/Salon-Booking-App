@@ -1,5 +1,6 @@
 package com.umar.exceptions.user.exceptionController;
 
+import com.umar.events.services.BatchValidationException;
 import com.umar.exceptions.common.exception.ApiException;
 import com.umar.exceptions.common.request.ApiError;
 import com.umar.exceptions.common.response.ValidationErrorResponse;
@@ -66,5 +67,10 @@ public class GlobalException {
         return ResponseEntity
                 .status(ex.getStatus())
                 .body(apiError);
+    }
+
+    @ExceptionHandler(BatchValidationException.class)
+    public ResponseEntity<Map<String, String>> handleBatchValidation(BatchValidationException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getErrors());
     }
 }

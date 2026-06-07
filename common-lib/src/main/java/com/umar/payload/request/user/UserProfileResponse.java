@@ -18,6 +18,7 @@ public class UserProfileResponse {
     private String lastName;
     private String phone;
     private String role;
+    private Boolean isActive;
     private Boolean isEmailVerified;
     private String profilePhotoUrl;
     private Boolean notifyEmail;

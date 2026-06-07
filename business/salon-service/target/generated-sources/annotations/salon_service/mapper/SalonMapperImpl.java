@@ -15,7 +15,7 @@ import salon_service.model.ServiceSummary;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-05-20T23:51:02+0530",
+    date = "2026-06-02T08:39:54+0530",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 23 (Oracle Corporation)"
 )
 @Component

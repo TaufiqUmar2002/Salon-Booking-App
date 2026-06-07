@@ -13,7 +13,6 @@ import com.umar.payload.response.salon.SalonResponseData;
 import com.umar.payload.response.salon.SalonResponseList;
 import com.umar.payload.response.salon.SalonResponseV1;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.type.descriptor.java.LocaleJavaType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,10 +26,8 @@ import salon_service.model.SalonAuditLog;
 import salon_service.repository.SalonAuditRepository;
 import salon_service.repository.SalonRepository;
 import salon_service.serviceinterface.ISalonService;
-
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 

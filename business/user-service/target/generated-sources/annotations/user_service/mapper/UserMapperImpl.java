@@ -9,7 +9,7 @@ import user_service.model.User;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-05-24T13:19:03+0530",
+    date = "2026-06-02T08:39:45+0530",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 23 (Oracle Corporation)"
 )
 @Component
@@ -68,6 +68,7 @@ public class UserMapperImpl implements UserMapper {
         if ( user.getRole() != null ) {
             userProfileResponse.role( user.getRole().name() );
         }
+        userProfileResponse.isActive( user.getIsActive() );
         userProfileResponse.isEmailVerified( user.getIsEmailVerified() );
         userProfileResponse.profilePhotoUrl( user.getProfilePhotoUrl() );
         userProfileResponse.notifyEmail( user.getNotifyEmail() );
