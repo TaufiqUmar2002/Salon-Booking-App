@@ -56,6 +56,8 @@ public class User {
 
     private String refreshToken;
 
+    private LocalDateTime lastBookingDate;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime lastLogin;
