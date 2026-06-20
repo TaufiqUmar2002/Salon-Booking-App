@@ -14,29 +14,26 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserEventProducer {
 
-    private final KafkaTemplate<String, UserProfileUpdatedEvent> userProfileUpdatedEventKafkaTemplate;
-    private final KafkaTemplate<String ,UserRegisteredEvent> userRegisteredEventKafkaTemplate;
-    private final KafkaTemplate<String, UserInactiveEvent> userInactiveEventKafkaTemplate;
-    private final KafkaTemplate<String, PasswordResetRequestedEvent> passwordResetRequestedEventKafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
 
     public void publishPasswordResetEvent(PasswordResetRequestedEvent event) {
         log.info("user password reset event publish {} ",event);
-        passwordResetRequestedEventKafkaTemplate.send("salon.user.password.reset", event.getUserId(), event);
+        kafkaTemplate.send("salon.user.password.reset", event);
     }
     public void publishUserRegisteredEvent(UserRegisteredEvent event){
         log.info("user registered event publish {} ",event);
-        userRegisteredEventKafkaTemplate.send("salon.user.registered",event);
+        kafkaTemplate.send("salon.user.registered",event);
     }
 
     public void publishUserProfileUpdateEvent(UserProfileUpdatedEvent event){
         log.info("user profile updated {}",event);
-        userProfileUpdatedEventKafkaTemplate.send("salon.user.profile.updated",event);
+        kafkaTemplate.send("salon.user.profile.updated",event);
     }
 
     public void publishUserInactiveEvent(UserInactiveEvent event){
         log.info("publishUserInactiveEvent {}",event);
-        userInactiveEventKafkaTemplate.send("salon.user.profile.updated",event);
+        kafkaTemplate.send("salon.user.profile.inactive",event);
     }
 
 }

@@ -28,6 +28,7 @@ user_service\serviceInterface\IAuthService.class
 user_service\constants\JwtConstant.class
 user_service\model\UserAuditLog.class
 user_service\repository\UserRepository.class
+user_service\scheduler\InactiveUserScheduler.class
 user_service\model\UserAuditLog$UserAuditLogBuilder.class
 user_service\dto\RegisterRequest.class
 user_service\events\UserEventProducer.class
@@ -37,6 +38,7 @@ user_service\dto\UserDTO.class
 user_service\constants\UserRole.class
 user_service\dto\UserDTO$UserDTOBuilder.class
 user_service\config\ExceptionConfig.class
+user_service\config\KafkaProducerConfig.class
 user_service\controller\UserAIController.class
 user_service\mapper\UserMapper.class
 user_service\util\JwtUtil.class

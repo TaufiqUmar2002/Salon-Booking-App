@@ -9,7 +9,7 @@ import user_service.model.User;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-08T13:07:19+0530",
+    date = "2026-06-20T21:19:02+0530",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 23 (Oracle Corporation)"
 )
 @Component

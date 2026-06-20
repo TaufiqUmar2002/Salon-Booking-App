@@ -17,7 +17,7 @@ import java.util.Map;
 public class KafkaProducerConfig {
 
     @Bean
-    public ProducerFactory<String, UserProfileUpdatedEvent> producerFactory(){
+    public ProducerFactory<String, Object> producerFactory(){
         Map<String,Object> config = new HashMap<>();
         config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -25,7 +25,7 @@ public class KafkaProducerConfig {
         return new DefaultKafkaProducerFactory<>(config);
     }
     @Bean
-    public KafkaTemplate<String, UserProfileUpdatedEvent> kafkaTemplate() {
+    public KafkaTemplate<String, Object> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
 }
