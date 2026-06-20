@@ -14,7 +14,6 @@ public class TokenBlacklistService {
 
     private static final String BLACKLIST_PREFIX =
             "blacklisted_token:";
-
     public void blacklistToken(
             String token,
             long expirationMillis) {

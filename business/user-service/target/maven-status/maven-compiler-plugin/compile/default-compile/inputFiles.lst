@@ -8,10 +8,6 @@ D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\m
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\controller\AuthController.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\controller\UserAIController.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\controller\UserController.java
-D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\dto\AuthResponse.java
-D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\dto\LoginRequest.java
-D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\dto\RegisterRequest.java
-D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\dto\UserDTO.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\events\UserEventProducer.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\file\FileStorageService.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\file\LocalFileStorageService.java

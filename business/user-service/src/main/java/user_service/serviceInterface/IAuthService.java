@@ -7,7 +7,6 @@ import com.umar.payload.response.user.AuthResponse;
 import com.umar.payload.response.user.ForgotEmailResponse;
 import com.umar.payload.response.user.LoginResponse;
 import com.umar.payload.response.user.RefreshTokenResponse;
-import user_service.dto.UserDTO;
 
 public interface IAuthService {
 
