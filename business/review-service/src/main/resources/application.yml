@@ -1,0 +1,38 @@
+server:
+    port: 2006
+
+
+
+spring:
+  application:
+    name: REVIEW-SERVICE
+  devtools:
+    add-properties: true
+
+  datasource:
+    url: jdbc:mysql://localhost:6003/app_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: app_user
+    password: app_password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  #  datasource:
+  #    url: jdbc:mysql://mysql-db:3306/app_db
+  #    username: app_user
+  #    password: app_password
+  #    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+logging:
+  level:
+    feign:
+      Logger: DEBUG
+    com.umar.exchange: DEBUG
+
+
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: http://localhost:4001/eureka/

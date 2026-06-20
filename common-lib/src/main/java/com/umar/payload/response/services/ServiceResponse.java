@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -19,6 +21,7 @@ public class ServiceResponse {
     private Double averageRating;
     private Integer bookingCount;
     private String imageUrl;
+    private BigDecimal currentPrice;
 
 
 }
