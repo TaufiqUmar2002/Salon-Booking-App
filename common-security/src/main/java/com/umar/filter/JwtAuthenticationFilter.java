@@ -31,11 +31,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
 
             String authHeader = request.getHeader("Authorization");
+            System.out.println(authHeader);
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 filterChain.doFilter(request, response);
                 return;
             }
             String authToken = authHeader.substring(7);
+            System.out.println(authToken);
+
             if (!jwtUtil.validateToken(authToken)) {
                 sendError(response,
                         "INVALID_TOKEN",

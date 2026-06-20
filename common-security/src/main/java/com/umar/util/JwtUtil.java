@@ -5,19 +5,37 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
 
-@Component
 public class JwtUtil {
 
+
+
+
     private SecretKey key;
+    private String  test="hdcbhjevbhje3yudsbhrvechvagrcdbxhg23ugcxvwhqf4yghcv";
+
+
+
+    @Value("${jwt.secret:hdcbhjevbhje3yudsbhrvechvagrcdbxhg23ugcxvwhqf4yghcv}")
+    private String secretKey;
+
 
     @PostConstruct
-    public void init(){
-        this.key = Keys.hmacShaKeyFor(JwtConstant.SECRET_KEY.getBytes());
+    public void init() {
+        System.out.println("====== JWT PROPERTIES INITIALIZATION START ======");
+        System.out.println("Property Injected String: " + this.secretKey);
+        System.out.println("String Length: " + this.secretKey.length());
+
+        // Always use the instance variable here
+        this.key = Keys.hmacShaKeyFor(this.secretKey.getBytes());
+        System.out.println("Generated Key: " + this.key);
+        System.out.println("====== JWT PROPERTIES INITIALIZATION END ======");
     }
 
 
@@ -28,6 +46,7 @@ public class JwtUtil {
 
     public boolean validateToken(String token) {
         try {
+            System.out.println("key is null : ---- "+token);
             extractClaims(token);
             return !isTokenExpired(token);
         } catch (Exception ex) {
@@ -36,7 +55,13 @@ public class JwtUtil {
     }
 
     public Claims extractClaims(String token) {
-            return Jwts.parser()
+        this.key = Keys.hmacShaKeyFor(this.test.getBytes());
+        System.out.println("key is null :-    [-----"+key);
+        System.out.println("token is null :-    [-----"+token);
+        System.out.println("key is null : ---- "+test);
+
+
+        return Jwts.parser()
                     .verifyWith(key)
                     .build()
                     .parseSignedClaims(token)
