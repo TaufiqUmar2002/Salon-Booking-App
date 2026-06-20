@@ -26,6 +26,7 @@
         <module>business</module>
         <module>cloud</module>
         <module>common-lib</module>
+        <module>common-security</module>
     </modules>
 
     <properties>
