@@ -12,6 +12,7 @@ import com.umar.payload.response.user.LoginResponse;
 import com.umar.payload.response.user.RefreshTokenResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,11 +28,10 @@ import user_service.repository.UserRepository;
 import user_service.serviceInterface.IAuthService;
 import user_service.serviceInterface.IVerificationService;
 import user_service.util.JwtUtil;
+
+import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -46,28 +46,29 @@ public class AuthService implements IAuthService {
     private final CustomUserDetailsService customUserDetailsService;
     private final IVerificationService verificationService;
     private final UserEventProducer eventProducer;
-    private final Map<String, List<LocalDateTime>> failedAttempts = new ConcurrentHashMap<>();
-    private static final int BLOCK_MINUTES = 15;
-
+    private static final Long BLOCK_MINUTES = 15L;
+    private final UserMapper userMapper;
+    private static final Long MAX_ATTEMPTS = 5L;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Override
     public AuthResponse signUp(AuthRequest request) {
         Optional<User> existingUser= userRepository.findByEmail(request.getEmail().trim().toLowerCase());
         if(existingUser.isPresent()){
-            throw new ApiException(HttpStatus.CONFLICT, "EMAIL_CONFLICT", "An account with this email already exists");
+            throw new ApiException(HttpStatus.CONFLICT, "EMAIL_CONFLICT", "registration.error.emailExists");
         }
         if(request.getRole().name().equals(UserRole.ADMIN.name())){
-           throw new ApiException(HttpStatus.FORBIDDEN,"INVALID_ROLE","ADMIN role cannot be self-assigned");
+           throw new ApiException(HttpStatus.UNPROCESSABLE_CONTENT,"INVALID_ROLE","registration.error.role");
         }
-        User newUser = UserMapper.INSTANCE.toEntity(request);
+        User newUser = userMapper.toEntity(request);
         newUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-        newUser.setCreatedAt(LocalDateTime.now());
         newUser.setIsActive(Boolean.FALSE);
         User savedUser = userRepository.save(newUser);
         VerificationToken verificationToken = verificationService.createToken(savedUser);
         log.info("verification token is : {}",verificationToken.getToken());
         UserRegisteredEvent registeredEvent = UserRegisteredEvent.builder()
                 .email(savedUser.getEmail())
+                .verificationToken(verificationToken.getToken())
                 .firstName(savedUser.getFirstName())
                 .producedAt(LocalDateTime.now())
                 .role(savedUser.getRole().name())
@@ -78,25 +79,27 @@ public class AuthService implements IAuthService {
                 .userId(savedUser.getId())
                 .email(savedUser.getEmail())
                 .firstname(savedUser.getFirstName())
-                .message("Registration successful. Please check your email to verify your account.").build();
+                .message("registration.success.message").build();
     }
 
 
 
     @Override
     public LoginResponse login(String email, String password,String ipAddress) throws Exception {
-        validateRateLimit(ipAddress,5);
+        validateRateLimit(ipAddress);
         Optional<User> userOptional = userRepository.findByEmail(email);
         if(userOptional.isEmpty() || !passwordEncoder.matches(password,userOptional.get().getPasswordHash())){
             recordFailedAttempt(ipAddress);
-            throw new ApiException(HttpStatus.NOT_FOUND,"INVALID_CREDENTIALS","'Invalid email or password");
+            throw new ApiException(HttpStatus.UNAUTHORIZED,"INVALID_CREDENTIALS","login.error.invalidEmailOrPassword");
         }
         User user = userOptional.get();
         if(!user.getIsEmailVerified()){
-            throw new ApiException(HttpStatus.BAD_REQUEST,"EMAIL_NOT_VERIFIED","Please verify your email before logging in");
+            recordFailedAttempt(ipAddress);
+            throw new ApiException(HttpStatus.FORBIDDEN,"EMAIL_NOT_VERIFIED","login.error.emailNotVerified");
         }
         if(!user.getIsActive()){
-            throw new ApiException(HttpStatus.FORBIDDEN,"ACCOUNT_DEACTIVATED","Your account has been deactivated. Contact support");
+            recordFailedAttempt(ipAddress);
+            throw new ApiException(HttpStatus.FORBIDDEN,"ACCOUNT_DEACTIVATED","login.error.accountDeactivated");
         }
         clearFailedAttempts(ipAddress);
         String jwtRefreshToken = user.getRefreshToken();
@@ -126,11 +129,11 @@ public class AuthService implements IAuthService {
         String email = jwtProvider.extractUserEmail(token);
         Optional<User> userOptional = userRepository.findByEmail(email);
         if(userOptional.isEmpty() || !userOptional.get().getIsActive()){
-            throw new ApiException(HttpStatus.FORBIDDEN,"ACCOUNT_DEACTIVATED","Account deactivated. Please contact support");
+            throw new ApiException(HttpStatus.FORBIDDEN,"ACCOUNT_DEACTIVATED","login.error.accountDeactivated");
         }
         User user = userOptional.get();
         if(jwtProvider.isTokenExpired(token) || !token.equals(user.getRefreshToken())){
-            throw new ApiException(HttpStatus.FORBIDDEN,"INVALID_REFRESH_TOKEN","Invalid or expired refresh token. Please log in again");
+            throw new ApiException(HttpStatus.UNAUTHORIZED,"INVALID_REFRESH_TOKEN","refreshToken.error.InvalidRefreshToken");
         }
         String jwtAccessToken  = jwtProvider.generateAccessToken(user);
         String jwtRefreshToken = jwtProvider.generateRefreshToken(user);
@@ -151,11 +154,11 @@ public class AuthService implements IAuthService {
 
     @Override
     public ForgotEmailResponse forgotEmail(ForgotPasswordRequest request) {
-        validateRateLimit(request.getEmail(),3);
+        validateRateLimit(request.getEmail());
         Optional<User> optionalUser = userRepository.findByEmail(request.getEmail());
         if(optionalUser.isEmpty()){
             recordFailedAttempt(request.getEmail());
-            throw new ApiException(HttpStatus.NOT_FOUND,"INVALID_CREDENTIALS","Invalid email");
+            throw new ApiException(HttpStatus.UNAUTHORIZED,"INVALID_CREDENTIALS","forgotEmail.error.invalidCredentials");
         }
         User user =optionalUser.get();
         VerificationToken passwordResetToken = verificationService.createToken(user);
@@ -169,7 +172,7 @@ public class AuthService implements IAuthService {
                 .userId(user.getId().toString())
                 .build();
         eventProducer.publishPasswordResetEvent(resetRequestedEvent);
-        return ForgotEmailResponse.builder().message(", a password reset link has been sent").build();
+        return ForgotEmailResponse.builder().message("forgotEmail.success.message").build();
     }
 
     @Override
@@ -178,7 +181,7 @@ public class AuthService implements IAuthService {
         verificationService.isTokenExpired(token);
         String hashedPassword = passwordEncoder.encode(request.getNewPassword());
         if(passwordEncoder.matches(request.getNewPassword(),token.getUser().getPasswordHash())){
-            throw new ApiException(HttpStatus.BAD_REQUEST,"SAME_PASSWORD","New password must be different from your current password");
+            throw new ApiException(HttpStatus.BAD_REQUEST,"SAME_PASSWORD","resetPassword.error.samePassword");
         }
         User user = token.getUser();
         user.setPasswordHash(hashedPassword);
@@ -196,21 +199,23 @@ public class AuthService implements IAuthService {
     }
 
 
-    private void validateRateLimit(String ipAddress,int maxAttempts){
-        List<LocalDateTime> attempts = failedAttempts.getOrDefault(ipAddress, new ArrayList<>());
-        LocalDateTime cutOff =LocalDateTime.now().minusMinutes(BLOCK_MINUTES);
-
-        attempts = attempts.stream().filter(time->time.isAfter(cutOff)).collect(Collectors.toCollection(ArrayList::new));
-        failedAttempts.put(ipAddress,attempts);
-        if(attempts.size()>maxAttempts){
-            throw new ApiException(HttpStatus.TOO_MANY_REQUESTS,"RATE_LIMIT_EXCEEDED", "Too many login attempts. Try again in 15 minutes.");
+    private void validateRateLimit(String ipAddress){
+        String key = "login:fail:" + ipAddress;
+        String attempts = redisTemplate.opsForValue().get(key);
+        if(attempts!=null &&Long.parseLong(attempts)>=MAX_ATTEMPTS){
+            throw new ApiException(HttpStatus.TOO_MANY_REQUESTS,"RATE_LIMIT_EXCEEDED", "login.error.toManyAttempts");
         }
     }
     private void recordFailedAttempt(String ipAddress) {
-        failedAttempts.computeIfAbsent(ipAddress, k -> new ArrayList<>()).add(LocalDateTime.now());
+        String key = "login:fail:" + ipAddress;
+        String attempts = redisTemplate.opsForValue().get(key);
+        Long count = redisTemplate.opsForValue().increment(key);
+        if (count != null && count == 1) {
+            redisTemplate.expire(key, Duration.ofMinutes(BLOCK_MINUTES));
+        }
     }
 
     private void clearFailedAttempts(String ipAddress) {
-        failedAttempts.remove(ipAddress);
+        redisTemplate.delete("login:fail:" + ipAddress);
     }
 }

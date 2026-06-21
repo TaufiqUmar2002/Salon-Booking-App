@@ -4,6 +4,12 @@ package user_service.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import user_service.constants.UserRole;
 
 import java.time.LocalDateTime;
@@ -15,6 +21,7 @@ import java.time.LocalDateTime;
 @Entity
 @Builder
 @Table(name = "users_salon")
+@EntityListeners(AuditingEntityListener.class)
 public class User {
 
     @Id
@@ -58,8 +65,15 @@ public class User {
 
     private LocalDateTime lastBookingDate;
 
+    @CreatedDate
     private LocalDateTime createdAt;
+    @CreatedBy
+    private String createdBy;
+    @LastModifiedBy
+    private String updatedBy;
+    @LastModifiedDate
     private LocalDateTime updatedAt;
+    @UpdateTimestamp
     private LocalDateTime lastLogin;
 
 }

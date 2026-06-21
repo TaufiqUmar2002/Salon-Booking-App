@@ -40,7 +40,7 @@ public class VerificationService implements IVerificationService {
         this.isTokenExpired(verificationToken);
         if(verificationToken.getUser().getIsEmailVerified()){
             tokenRepository.delete(verificationToken);
-            throw new ApiException(HttpStatus.CONFLICT,"ALREADY_VERIFIED","'Email already verified. Please log in");
+            throw new ApiException(HttpStatus.CONFLICT,"ALREADY_VERIFIED","verifyEmail.error.emailAlreadyVerified");
         }
         User user =verificationToken.getUser();
         user.setIsEmailVerified(true);

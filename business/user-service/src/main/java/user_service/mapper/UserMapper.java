@@ -10,7 +10,6 @@ import com.umar.payload.request.user.AuthRequest;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
-    UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
     @Mapping(target = "passwordHash",ignore = true)
     @Mapping(target = "id", ignore = true)

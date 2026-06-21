@@ -1,6 +1,7 @@
 package user_service.config;
 
 import com.umar.exceptions.user.exceptionController.GlobalException;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -10,7 +11,7 @@ import org.springframework.context.annotation.Import;
 public class ExceptionConfig {
 
     @Bean
-    public GlobalException userException(){
-        return new GlobalException();
+    public GlobalException userException(MessageSource messageSource){
+        return new GlobalException(messageSource);
     }
 }

@@ -1,5 +1,6 @@
 user_service\controller\UserController.class
 user_service\service\CustomUserDetailsService.class
+user_service\config\AuditConfig.class
 user_service\UserServiceApplication.class
 user_service\file\LocalFileStorageService.class
 user_service\file\FileStorageService.class
@@ -7,6 +8,7 @@ user_service\serviceInterface\IVerificationService.class
 user_service\service\UserAiService.class
 user_service\model\VerificationToken.class
 user_service\service\AuthService.class
+user_service\audit\AuditorAwareImpl.class
 user_service\service\VerificationService.class
 user_service\serviceInterface\IUserService.class
 user_service\config\AiConfig.class
@@ -32,6 +34,7 @@ user_service\model\UserAuditLog$UserAuditLogBuilder.class
 user_service\events\UserEventProducer.class
 user_service\globalException\CustomAccessDeniedHandler.class
 user_service\util\TokenBlacklistService.class
+user_service\config\UserValidationConfig.class
 user_service\constants\UserRole.class
 user_service\config\ExceptionConfig.class
 user_service\config\KafkaProducerConfig.class
