@@ -1,6 +1,5 @@
 package user_service.config;
 
-import com.umar.events.user.UserProfileUpdatedEvent;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.context.annotation.Bean;

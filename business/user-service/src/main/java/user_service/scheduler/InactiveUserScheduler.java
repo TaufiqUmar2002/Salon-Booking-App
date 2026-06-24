@@ -10,6 +10,7 @@ import user_service.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 @Component
 @RequiredArgsConstructor
@@ -17,22 +18,25 @@ public class InactiveUserScheduler {
 
     private final UserRepository repository;
     private final UserEventProducer eventProducer;
+    private final Executor executor;
 
 
     @Scheduled(cron = "0 0 2 */7 * *")
     public void publishInactiveUsers() {
         List<User> inactiveUsers = repository.findInactiveUsers(LocalDateTime.now());
-        inactiveUsers.forEach(user -> {
-            UserInactiveEvent event =
-                    UserInactiveEvent.builder()
-                            .userId(user.getId())
-                            .email(user.getEmail())
-                            .lastActiveAt(
-                                    user.getLastBookingDate())
-                            .inactiveDays(
-                                    calculateInactiveDays(user))
-                            .build();
-            eventProducer.publishUserInactiveEvent(event);
+        executor.execute(()->{
+            inactiveUsers.forEach(user -> {
+                UserInactiveEvent event =
+                        UserInactiveEvent.builder()
+                                .userId(user.getId())
+                                .email(user.getEmail())
+                                .lastActiveAt(
+                                        user.getLastBookingDate())
+                                .inactiveDays(
+                                        calculateInactiveDays(user))
+                                .build();
+                eventProducer.publishUserInactiveEvent(event);
+        });
         });
     }
 

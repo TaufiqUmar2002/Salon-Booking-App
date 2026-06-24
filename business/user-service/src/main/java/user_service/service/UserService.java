@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -47,12 +48,13 @@ public class UserService implements IUserService {
     private final JwtUtil jwtProvider;
     private final TokenBlacklistService blacklistService;
     private final UserAuditLogRepository auditLogRepository;
+    private final Executor executor;
 
     @Override
     public UserProfileResponse getUserProfile(Long userId) {
         Optional<User> userOptional = repository.findById(userId);
         if(userOptional.isEmpty()){
-            throw new ApiException(HttpStatus.NOT_FOUND,"USER_NOT_FOUND","User not found");
+            throw new ApiException(HttpStatus.NOT_FOUND,"USER_NOT_FOUND","user.notFound");
         }
         return userMapper.toResponse(userOptional.get());
     }
@@ -78,7 +80,7 @@ public class UserService implements IUserService {
         updateField(request.getFirstName(),user.getFirstName(),user::setLastName,"firstName",updatedFields);
         updateField(request.getPhone(),user.getPhone(),user::setPhone,"phone",updatedFields);
         if(request.getRole()!=null &&request.getRole().equals("ADMIN")){
-            throw new ApiException(HttpStatus.FORBIDDEN,"INVALID_ROLE","ADMIN role cannot be self-assigned");
+            throw new ApiException(HttpStatus.FORBIDDEN,"INVALID_ROLE","user.updateUserProfile");
         }
         user.setUpdatedAt(LocalDateTime.now());
         user.setRole(UserRole.CUSTOMER);
@@ -86,11 +88,13 @@ public class UserService implements IUserService {
         if(registeredEvent!=null){
             eventProducer.publishUserRegisteredEvent(registeredEvent);
         }
-        UserProfileUpdatedEvent event = UserProfileUpdatedEvent.builder()
-                        .userId(user.getId())
-                                .updatedAt(LocalDateTime.now())
-                                        .updatedFields(updatedFields).build();
-        eventProducer.publishUserProfileUpdateEvent(event);
+        executor.execute(() -> {
+            UserProfileUpdatedEvent event = UserProfileUpdatedEvent.builder()
+                    .userId(user.getId())
+                    .updatedAt(LocalDateTime.now())
+                    .updatedFields(updatedFields).build();
+            eventProducer.publishUserProfileUpdateEvent(event);
+        });
         return userMapper.toResponse(user);
     }
 
@@ -108,7 +112,7 @@ public class UserService implements IUserService {
     public void updateUserNotification(Long id,UserNotificationRequest request) {
         User user = this.validateUserExists(id,null);
         if(request==null){
-            throw new ApiException(HttpStatus.BAD_REQUEST,"NO_FIELDS_PROVIDED","'At least one notification preference must be provided'");
+            throw new ApiException(HttpStatus.BAD_REQUEST,"NO_FIELDS_PROVIDED","user.updateUserNotification");
         }
         updateField(request.getNotifyEmail(),user.getNotifyEmail(),user::setNotifyEmail,"notifyEmail",null);
         updateField(request.getNotifyPush(),user.getNotifyPush(),user::setNotifyPush,"notifyPush",null);
@@ -121,24 +125,22 @@ public class UserService implements IUserService {
     public void logoutUser(Long userId, LogoutRequest request,String accessToken) {
         User user =validateUserExists(userId, null);
         if(request == null || request.getRefreshToken() == null || request.getRefreshToken().isEmpty()){
-            throw new ApiException(HttpStatus.BAD_REQUEST,"MISSING_TOKEN","Refresh token is required for logout");
+            throw new ApiException(HttpStatus.BAD_REQUEST,"MISSING_TOKEN","user.logout.refreshTokenRequired");
         }
         if(!user.getRefreshToken().equals(request.getRefreshToken())){
-            throw new ApiException(HttpStatus.BAD_REQUEST,"","");
+            throw new ApiException(HttpStatus.BAD_REQUEST,"","user.logout.inValidRefreshToken");
         }
         user.setRefreshToken(null);
         userRepository.save(user);
         long remainingExpiry = jwtProvider.getRemainingExpiration(accessToken);
         blacklistService.blacklistToken(accessToken,remainingExpiry);
-
-
     }
 
     @Override
     public void deleteUser(Long id,String reason,String accessToken){
         User user =validateUserExists(id,null);
         if(!user.getIsActive()){
-            throw new ApiException(HttpStatus.BAD_REQUEST,"ALREADY_INACTIVE","This account is already inactive");
+            throw new ApiException(HttpStatus.BAD_REQUEST,"ALREADY_INACTIVE","user.inactive");
         }
         user.setRefreshToken(null);
         user.setIsActive(false);
@@ -146,7 +148,7 @@ public class UserService implements IUserService {
         String email = jwtProvider.extractUserEmail(accessToken);
         User adminUser = validateUserExists(null,email);
         if(Objects.equals(user.getId(), adminUser.getId())){
-            throw new ApiException(HttpStatus.BAD_REQUEST,"SELF_DEACTIVATION","You cannot deactivate your own account");
+            throw new ApiException(HttpStatus.BAD_REQUEST,"SELF_DEACTIVATION","user.selfDeactivation");
         }
         UserAuditLog auditLog = UserAuditLog.builder()
                 .targetUserId(user.getId())
@@ -160,7 +162,7 @@ public class UserService implements IUserService {
     @Override
     public UserValidateResponse validateUser(String accessToken) {
         if(jwtProvider.isTokenExpired(accessToken)){
-            throw new ApiException(HttpStatus.BAD_REQUEST,"","");
+            throw new ApiException(HttpStatus.BAD_REQUEST,"TOKEN_EXPIRED","user.validateUser");
         }
         Claims claims = jwtProvider.extractClaims(accessToken);
         Long userId = claims.get("userId",Long.class);
@@ -182,15 +184,15 @@ public class UserService implements IUserService {
 
     private void validateImage(MultipartFile file){
         if(file.isEmpty()){
-            throw new ApiException(HttpStatus.BAD_REQUEST,"EMPTY_FILE","Image file is required");
+            throw new ApiException(HttpStatus.BAD_REQUEST,"EMPTY_FILE","user.image.notEmpty");
         }
         List<String> allowedTypes = List.of("image/jpeg","image/png","image/webp");
         if(!allowedTypes.contains(file.getContentType())){
-            throw new ApiException(HttpStatus.BAD_REQUEST,"INVALID_FILE_TYPE","Only JPG, PNG, WEBP allowed");
+            throw new ApiException(HttpStatus.BAD_REQUEST,"INVALID_FILE_TYPE","user.image.allowedTypes");
         }
         long maxSize = 5 * 1024 * 1024;
         if(file.getSize()>maxSize){
-            throw new ApiException(HttpStatus.BAD_REQUEST,"FILE_TOO_LARGE","Max file size is 5MB");
+            throw new ApiException(HttpStatus.BAD_REQUEST,"FILE_TOO_LARGE","user.image.imageToLarge");
         }
     }
 
@@ -205,14 +207,14 @@ public class UserService implements IUserService {
         if(userId!=null){
             Optional<User> userOptional = repository.findById(userId);
             if(userOptional.isEmpty()) {
-                throw new ApiException(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "User not found");
+                throw new ApiException(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "user.userNotFound");
             }
             user=userOptional.get();
         }
         else {
             Optional<User> userOptional = repository.findByEmail(email);
             if(userOptional.isEmpty()){
-                throw new ApiException(HttpStatus.NOT_FOUND,"USER_NOT_FOUND","User not found");
+                throw new ApiException(HttpStatus.NOT_FOUND,"USER_NOT_FOUND","user.userNotFound");
             }
             user=userOptional.get();
         }

@@ -1,9 +1,7 @@
 package com.umar.payload.request.user;
 
 import com.umar.payload.constants.UserRole;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,7 +23,12 @@ public class AuthRequest implements Serializable {
     @Email
     private String email;
 
-    @NotNull
+    @NotBlank(message = "Password is required")
+    @Size(min = 8, message = "Password must be at least 8 characters long")
+    @Pattern(
+            regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&].*$",
+            message = "Password must contain at least one uppercase letter, one digit, and one special character"
+    )
     private String password;
 
     @NotNull
@@ -35,6 +38,10 @@ public class AuthRequest implements Serializable {
     private String lastName;
 
     @Size(max = 12,min =6)
+    @Pattern(
+            regexp = "^\\+[1-9]\\d{1,14}$",
+            message = "Phone number must match E.164 format (e.g., +15550199)"
+    )
     private String phone;
 
     @NotNull

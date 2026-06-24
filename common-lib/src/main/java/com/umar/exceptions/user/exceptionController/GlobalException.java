@@ -5,6 +5,12 @@ import com.umar.exceptions.common.exception.ApiException;
 import com.umar.exceptions.common.request.ApiError;
 import com.umar.exceptions.common.response.ValidationErrorResponse;
 import com.umar.exceptions.user.exception.ResourceAlreadyExistsException;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -14,11 +20,15 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalException {
-    
+
+    private final MessageSource messageSource;
+
     @ExceptionHandler(ResourceAlreadyExistsException.class)
     public ResponseEntity<Map<String,String>> handleUserExists(ResourceAlreadyExistsException exception){
         return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", exception.getLocalizedMessage()));
@@ -51,15 +61,15 @@ public class GlobalException {
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ApiError> handleApiException(ApiException ex) {
-
+        String message = messageSource.getMessage(ex.getMessage(), null, Locale.US);
         ApiError apiError = ApiError.builder()
                 .status(ex.getStatus().value())
                 .code(ex.getCode())
-                .message(ex.getMessage())
+                .message(message)
                 .response(
                         java.util.Map.of(
                                 "error",
-                                ex.getMessage()
+                                message
                         )
                 )
                 .timestamp(LocalDateTime.now())

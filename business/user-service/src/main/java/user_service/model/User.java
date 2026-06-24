@@ -65,6 +65,8 @@ public class User {
 
     private LocalDateTime lastBookingDate;
 
+    private Boolean onboardingComplete;
+
     @CreatedDate
     private LocalDateTime createdAt;
     @CreatedBy

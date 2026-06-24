@@ -78,9 +78,9 @@ public class JwtUtil {
 
         }
         catch (SecurityException e) {
-            throw new ApiException(HttpStatus.UNAUTHORIZED, "INVALID_TOKEN", "Invalid JWT signature");
+            throw new ApiException(HttpStatus.UNAUTHORIZED, "INVALID_TOKEN", "user.jwt.invalidJwt");
         } catch (Exception e) {
-            throw new ApiException(HttpStatus.UNAUTHORIZED, "INVALID_TOKEN", "Token is invalid or expired");
+            throw new ApiException(HttpStatus.UNAUTHORIZED, "INVALID_TOKEN", "user.jwt.invalidToken");
         }
     }
 

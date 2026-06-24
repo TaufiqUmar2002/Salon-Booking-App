@@ -33,6 +33,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -50,6 +51,7 @@ public class AuthService implements IAuthService {
     private final UserMapper userMapper;
     private static final Long MAX_ATTEMPTS = 5L;
     private final RedisTemplate<String, String> redisTemplate;
+    private final Executor executor; ;
 
     @Override
     public AuthResponse signUp(AuthRequest request) {
@@ -165,13 +167,18 @@ public class AuthService implements IAuthService {
         user.setPasswordResetToken(passwordResetToken.getToken());
         userRepository.save(user);
         clearFailedAttempts(request.getEmail());
-        PasswordResetRequestedEvent resetRequestedEvent =PasswordResetRequestedEvent
-                .builder()
-                .email(user.getEmail())
-                .resetToken(passwordResetToken.getToken())
-                .userId(user.getId().toString())
-                .build();
-        eventProducer.publishPasswordResetEvent(resetRequestedEvent);
+        executor.execute(
+                ()->{
+                    PasswordResetRequestedEvent resetRequestedEvent =PasswordResetRequestedEvent
+                            .builder()
+                            .email(user.getEmail())
+                            .resetToken(passwordResetToken.getToken())
+                            .userId(user.getId().toString())
+                            .build();
+                    eventProducer.publishPasswordResetEvent(resetRequestedEvent);
+                }
+        );
+
         return ForgotEmailResponse.builder().message("forgotEmail.success.message").build();
     }
 

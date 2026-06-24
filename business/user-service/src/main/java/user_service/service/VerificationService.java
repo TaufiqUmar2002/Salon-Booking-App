@@ -53,7 +53,7 @@ public class VerificationService implements IVerificationService {
     public VerificationToken getVerificationToken(String token) {
         Optional<VerificationToken> verificationTokenOptional = tokenRepository.findByToken(token);
         if(verificationTokenOptional.isEmpty()){
-            throw new ApiException(HttpStatus.NOT_FOUND,"TOKEN_NOT_FOUND","'Verification link is invalid");
+            throw new ApiException(HttpStatus.NOT_FOUND,"TOKEN_NOT_FOUND","resetPassword.error.tokenNotFound");
         }
         return verificationTokenOptional.get();
     }
@@ -62,7 +62,7 @@ public class VerificationService implements IVerificationService {
     public void isTokenExpired(VerificationToken verificationToken) {
         if(verificationToken.isExpired()){
             tokenRepository.delete(verificationToken);
-            throw new ApiException(HttpStatus.GONE,"TOKEN_EXPIRED","'Verification link has expired. Request a new one");
+            throw new ApiException(HttpStatus.FORBIDDEN,"TOKEN_EXPIRED","verifyEmail.error.tokenExpired");
         }
     }
 
