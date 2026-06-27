@@ -1,14 +1,15 @@
 package category_service.service;
 
-
-import category_service.event.CategoryEventProducer;
-import category_service.exchange.UserClient;
+import category_service.events.CategoryEventProducer;
+import category_service.exchange.BookingClient;
+import category_service.exchange.SalonClient;
 import category_service.mapper.CategoryMapper;
 import category_service.model.Category;
 import category_service.model.CategoryAuditLog;
 import category_service.repository.CategoryAuditLogRepository;
 import category_service.repository.CategoryRepository;
 import category_service.serviceinterface.ICategoryService;
+import com.umar.events.category.CategoryMergeEvent;
 import com.umar.events.category.CreateCategoryEventRequest;
 import com.umar.events.category.UpdateCategoryEventRequest;
 import com.umar.exceptions.common.exception.ApiException;
@@ -16,22 +17,29 @@ import com.umar.payload.request.category.CreateCategoryRequest;
 import com.umar.payload.request.category.DeleteCategoryRequest;
 import com.umar.payload.request.category.MergeCategoryRequest;
 import com.umar.payload.request.category.UpdateCategoryRequest;
-import com.umar.payload.request.user.UserValidateResponse;
+import com.umar.payload.response.booking.BookingResponse;
+import com.umar.payload.response.booking.UserBookingResponse;
 import com.umar.payload.response.category.CategoryResponse;
 import com.umar.payload.response.category.CategoryResponseList;
 import com.umar.payload.response.category.LookupCategory;
 import com.umar.payload.response.category.LookupCategoryResponse;
+import com.umar.payload.response.salon.SalonResponseList;
+import com.umar.payload.response.salon.SalonResponseV1;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 
 
 @Slf4j
@@ -40,43 +48,44 @@ import java.util.stream.Stream;
 public class CategoryService implements ICategoryService {
 
     private final CategoryRepository categoryRepository;
-    private final UserClient userClient;
     private final CategoryMapper categoryMapper;
     private final CategoryAuditLogRepository categoryAuditLogRepository;
     private final CategoryEventProducer eventProducer;
+    private final Executor executor;
+    private final SalonClient salonClient;
+    private final BookingClient bookingClient;
 
     @Override
     public CategoryResponse createCategory(CreateCategoryRequest request) {
-        UserValidateResponse response = userClient.getUserValidation();
         Optional<Category> category= categoryRepository.findCategoryByName(request.getName());
         if(category.isPresent()){
-            throw new ApiException(HttpStatus.BAD_REQUEST,"DUPLICATE_NAME","A category with this name already exists at this level");
+            throw new ApiException(HttpStatus.CONFLICT,"DUPLICATE_NAME","category.create.duplicateName");
         }
         Category persistCategory = categoryMapper.toEntity(request);
         if(request.getParentId()!=null){
             Optional<Category> parentCategory = categoryRepository.findById(request.getParentId());
             if(parentCategory.isEmpty()){
-                throw new ApiException(HttpStatus.BAD_REQUEST,"PARENT_NOT_FOUND","Parent category not found");
+                throw new ApiException(HttpStatus.NOT_FOUND,"PARENT_NOT_FOUND","category.create.parentNotFound");
             }
             parentCategory.ifPresent(persistCategory::setParent);
         }
-        persistCategory.setCreatedBy(response.getUserId());
-        persistCategory.setIsActive(true);
+        persistCategory.setIsActive(Boolean.TRUE);
         persistCategory.setCreatedAt(LocalDateTime.now());
         Category savedCategory  =categoryRepository.save(persistCategory);
-        CategoryAuditLog auditLog = new CategoryAuditLog();
-        auditLog.setAction("CREATED");
-        auditLog.setPerformedAt(LocalDateTime.now());
-        auditLog.setCategoryId(savedCategory.getId());
-        auditLog.setReason("new created");
-        auditLog.setAdminId(response.getUserId());
-        categoryAuditLogRepository.save(auditLog);
-        CreateCategoryEventRequest eventRequest =CreateCategoryEventRequest.builder()
+        CategoryAuditLog auditLog = CategoryAuditLog.builder()
+                .action("CREATE")
                 .categoryId(savedCategory.getId())
-                .description(savedCategory.getDescription())
-                .createdAt(LocalDateTime.now())
-                .build();
-        eventProducer.publishCategoryCreationEvent(eventRequest);
+                .reason("New Created")
+                .adminId(null).build();
+        categoryAuditLogRepository.save(auditLog);
+        executor.execute(()->{
+            CreateCategoryEventRequest eventRequest =CreateCategoryEventRequest.builder()
+                    .categoryId(savedCategory.getId())
+                    .description(savedCategory.getDescription())
+                    .createdAt(LocalDateTime.now())
+                    .build();
+            eventProducer.publishCategoryCreationEvent(eventRequest);
+        });
         return categoryMapper.toResponse(savedCategory);
     }
 
@@ -86,7 +95,7 @@ public class CategoryService implements ICategoryService {
             throw new ApiException(
                     HttpStatus.BAD_REQUEST,
                     "INVALID_FORMAT",
-                    "format must be either flat or tree"
+                    "category.getCategory.invalidFormat"
             );
         }
         List<Category> categoryEntities = categoryRepository.findByIsActiveTrueOrderByDisplayOrderAsc();
@@ -118,7 +127,7 @@ public class CategoryService implements ICategoryService {
     public CategoryResponse getCategoryById(Long id) {
         Optional<Category> categoryOptional = this.categoryRepository.findById(id);
         if(categoryOptional.isEmpty()){
-            throw new ApiException(HttpStatus.NOT_FOUND,"CATEGORY_NOT_FOUND","category not found with given id");
+            throw new ApiException(HttpStatus.NOT_FOUND,"CATEGORY_NOT_FOUND","category.notFound");
         }
         Category category =categoryOptional.get();
         CategoryResponse response =categoryMapper.toResponse(category);
@@ -133,16 +142,16 @@ public class CategoryService implements ICategoryService {
 
     @Override
     public CategoryResponse updateCategory(Long id, UpdateCategoryRequest request) {
-        Category category  = categoryRepository.findById(id).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND, "CATEGORY_NOT_FOUND", "Category not found"));
+        Category category  = categoryRepository.findById(id).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND, "CATEGORY_NOT_FOUND", "category.notFound"));
         Category newParent=null;
         if(request.getParentId()!=null){
-            newParent = categoryRepository.findById(request.getParentId()).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND, "PARENT_NOT_FOUND", "Parent Category not found"));
+            newParent = categoryRepository.findById(request.getParentId()).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND, "PARENT_NOT_FOUND", "category.create.parentNotFound"));
             validateCircularReference(category, newParent);
         }
         boolean exists = categoryRepository
                         .existsByNameIgnoreCaseAndParentIdAndIdNot(request.getName(), request.getParentId(), category.getId());
         if (exists) {
-            throw new ApiException(HttpStatus.CONFLICT, "DUPLICATE_CATEGORY", "Category already exists");
+            throw new ApiException(HttpStatus.CONFLICT, "DUPLICATE_CATEGORY", "category.create.duplicateName");
         }
         category.setName(request.getName());
         category.setParent(newParent);
@@ -151,16 +160,18 @@ public class CategoryService implements ICategoryService {
         categoryRepository.save(category);
         CategoryAuditLog auditLog = CategoryAuditLog.builder()
                 .categoryId(category.getId())
-                .performedAt(LocalDateTime.now())
+                .action("UPDATE")
                 .reason("Due to business")
                 .build();
         categoryAuditLogRepository.save(auditLog);
-        UpdateCategoryEventRequest eventRequest = UpdateCategoryEventRequest.builder()
-                .categoryId(category.getId())
-                .description(category.getDescription())
-                .createdAt(LocalDateTime.now())
-                .build();
-        eventProducer.publishCategoryUpdateEvent(eventRequest);
+        executor.execute(()->{
+            UpdateCategoryEventRequest eventRequest = UpdateCategoryEventRequest.builder()
+                    .categoryId(category.getId())
+                    .description(category.getDescription())
+                    .createdAt(LocalDateTime.now())
+                    .build();
+            eventProducer.publishCategoryUpdateEvent(eventRequest);
+        });
         return CategoryResponse.builder()
                 .categoryId(category.getId())
                 .name(category.getName())
@@ -170,12 +181,18 @@ public class CategoryService implements ICategoryService {
 
     @Override
     public void deleteCategory(Long id, DeleteCategoryRequest request) {
-        Category category = categoryRepository.findById(id).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND, "PARENT_NOT_FOUND", "Parent Category not found"));
+        Category category = categoryRepository.findById(id).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND, "PARENT_NOT_FOUND", "category.create.parentNotFound"));
         if(Boolean.FALSE.equals(category.getIsActive())){
-            throw new ApiException(HttpStatus.NOT_FOUND,"ALREADY_INACTIVE","'This category is already inactive");
+            throw new ApiException(HttpStatus.NOT_FOUND,"ALREADY_INACTIVE","category.inActive");
         }
-        /* Salon service calling*/
-        /* Booking service calling*/
+        SalonResponseList salonByCategory = salonClient.getSalonByCategory(id);
+        if(salonByCategory !=null && salonByCategory.getSalonResponseDataList().size()>1){
+            throw new ApiException(HttpStatus.CONFLICT,"HAS_ACTIVE_SERVICES","category.delete.salonExists");
+        }
+        UserBookingResponse bookingResponse = bookingClient.getBookingByCategory(id);
+        if(bookingResponse !=null && bookingResponse.getTotalPages()>1){
+            throw new ApiException(HttpStatus.CONFLICT,"HAS_OPEN_BOOKINGS","category.delete.bookingExists");
+        }
         category.setIsActive(false);
         category.setUpdatedAt(LocalDateTime.now());
         categoryRepository.save(category);
@@ -184,25 +201,27 @@ public class CategoryService implements ICategoryService {
                 .performedAt(LocalDateTime.now())
                 .build();
         categoryAuditLogRepository.save(auditLog);
-        UpdateCategoryEventRequest eventRequest = UpdateCategoryEventRequest.builder()
-                .categoryId(id)
-                .createdAt(LocalDateTime.now())
-                .description(category.getDescription())
-                .build();
-        eventProducer.publishCategoryUpdateEvent(eventRequest);
+        executor.execute(()->{
+            UpdateCategoryEventRequest eventRequest = UpdateCategoryEventRequest.builder()
+                    .categoryId(id)
+                    .createdAt(LocalDateTime.now())
+                    .description(category.getDescription())
+                    .build();
+            eventProducer.publishCategoryDeleteEvent(eventRequest);
 
+        });
     }
 
     @Override
     public CategoryResponse restoreCategory(Long id) {
-        Category category = categoryRepository.findById(id).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND, "PARENT_NOT_FOUND", "Parent Category not found"));
+        Category category = categoryRepository.findById(id).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND, "PARENT_NOT_FOUND", "category.create.parentNotFound"));
         if(Boolean.TRUE.equals(category.getIsActive())){
-            throw new ApiException(HttpStatus.NOT_FOUND,"ALREADY_ACTIVE","'This category is already active");
+            throw new ApiException(HttpStatus.NOT_FOUND,"ALREADY_ACTIVE","category.active");
         }
         if(category.getParent()!=null){
-            Category parentCategory = categoryRepository.findByParentId(category.getParent().getId()).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND, "PARENT_NOT_FOUND", "Parent Category not found")).get(0);
+            Category parentCategory = categoryRepository.findByParentId(category.getParent().getId()).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND, "PARENT_NOT_FOUND", "category.create.parentNotFound")).get(0);
             if(Boolean.FALSE.equals(parentCategory.getIsActive())){
-                throw new ApiException(HttpStatus.BAD_REQUEST,"PARENT_INACTIVE","'Cannot restore: parent category is still inactive. Restore the parent first");
+                throw new ApiException(HttpStatus.BAD_REQUEST,"PARENT_INACTIVE","category.parentInactive");
             }
         }
         CategoryAuditLog auditLog = CategoryAuditLog.builder()
@@ -210,23 +229,49 @@ public class CategoryService implements ICategoryService {
                 .performedAt(LocalDateTime.now())
                 .action("RESTORE").build();
         categoryAuditLogRepository.save(auditLog);
-        CreateCategoryEventRequest eventRequest = CreateCategoryEventRequest.builder()
-                .categoryId(category.getId())
-                .createdAt(LocalDateTime.now())
-                .description(category.getDescription())
-                .build();
-        eventProducer.publishCategoryRestoreEvent(eventRequest);
+        executor.execute(()->{
+            CreateCategoryEventRequest eventRequest = CreateCategoryEventRequest.builder()
+                    .categoryId(category.getId())
+                    .createdAt(LocalDateTime.now())
+                    .description(category.getDescription())
+                    .build();
+            eventProducer.publishCategoryRestoreEvent(eventRequest);
+        });
         return categoryMapper.toResponse(category);
     }
 
     @Override
     public CategoryResponse mergeCategory(Long id, MergeCategoryRequest request) {
         if(Objects.equals(id, request.getTargetCategoryId())){
-            throw new ApiException(HttpStatus.BAD_REQUEST,"SELF_MERGE","");
+            throw new ApiException(HttpStatus.BAD_REQUEST,"SELF_MERGE","category.merge.selfMerge");
         }
-        Category sourceCategory = categoryRepository.findById(id).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND, "PARENT_NOT_FOUND", "Parent Category not found"));
-        Category targetCategory = categoryRepository.findById(request.getTargetCategoryId()).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND, "PARENT_NOT_FOUND", "Parent Category not found"));
-        return null;
+        Category sourceCategory = categoryRepository.findById(id).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND, "CATEGORY_NOT_FOUND", "category.notFound"));
+        Category targetCategory = categoryRepository.findById(request.getTargetCategoryId()).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND, "CATEGORY_NOT_FOUND", "category.notFound"));
+        if(!sourceCategory.getIsActive() || !targetCategory.getIsActive()){
+            throw new ApiException(HttpStatus.BAD_REQUEST,"INACTIVE_CATEGORY","category.inActive");
+        }
+        List<Category> sourceChildren = this.categoryRepository.findByParentId(sourceCategory.getId()).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND, "PARENT_NOT_FOUND", "category.parentNotFound"));
+        List<Category> updatedSourceChildren =  sourceChildren.stream().peek(category -> category.setParent(targetCategory)).toList();
+        categoryRepository.saveAll(updatedSourceChildren);
+        sourceCategory.setIsActive(false);
+        sourceCategory.setMergedIntoId(targetCategory);
+        categoryRepository.save(sourceCategory);
+        CategoryAuditLog auditLog = CategoryAuditLog.builder()
+                .categoryId(sourceCategory.getId())
+                .performedAt(LocalDateTime.now())
+                .action("MERGE")
+                .build();
+        categoryAuditLogRepository.save(auditLog);
+        executor.execute(()->{
+            CategoryMergeEvent mergeEvent =CategoryMergeEvent.builder()
+                    .sourceCategoryId(id)
+                    .targetCategoryId(request.getTargetCategoryId())
+                    .build();
+            eventProducer.publishCategoryMergeEvent(mergeEvent);
+        });
+        return CategoryResponse.builder()
+                .categoryId(targetCategory.getId())
+                .build();
     }
 
     @Override
@@ -244,13 +289,12 @@ public class CategoryService implements ICategoryService {
                 throw new ApiException(
                         HttpStatus.BAD_REQUEST,
                         "CIRCULAR_REFERENCE",
-                        "Category cannot be its own ancestor"
+                        "category.ownAncestor"
                 );
             }
             current=current.getParent();
         }
     }
-
 
     private void updateLevels(Category category, int level) {
         category.setLevel(level);
@@ -307,13 +351,19 @@ public class CategoryService implements ICategoryService {
         return roots;
     }
 
-
-
     private String getAccessToken(HttpServletRequest request){
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return null;
         }
         return authHeader.substring(7);
+    }
+
+    private UserDetails getCurrentLoggedUser(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication!=null && authentication.getPrincipal()!=null && authentication.getPrincipal() instanceof UserDetails userDetails){
+            return userDetails;
+        }
+        return null;
     }
 }

@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -14,6 +16,7 @@ import java.util.Map;
 @Builder
 @Entity
 @Data
+@EntityListeners(AuditingEntityListener.class)
 public class CategoryAuditLog {
 
     @Id
@@ -27,5 +30,6 @@ public class CategoryAuditLog {
     @ElementCollection
     private Map<String,String> changeFields;
     private String reason;
+    @CreatedDate
     private LocalDateTime performedAt;
 }

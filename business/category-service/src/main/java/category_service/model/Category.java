@@ -3,6 +3,11 @@ package category_service.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +17,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class Category {
 
     @Id
@@ -51,15 +57,26 @@ public class Category {
 
     private String metaDescription;
 
+    @CreatedDate
     private LocalDateTime createdAt;
+
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    private Long createdBy;
+    @CreatedBy
+    private String createdBy;
+
+    @LastModifiedBy
+    private String updatedBy;
 
 
     @PrePersist
     @PreUpdate
     public void setSlug() {
+        if (name == null || name.isBlank()) {
+            slug = null;
+            return;
+        }
         this.slug = name.toLowerCase()
                 .trim()
                 .replaceAll("[^a-z0-9\\s]", "")

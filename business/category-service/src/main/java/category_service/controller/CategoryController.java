@@ -34,6 +34,7 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatus.OK).body(categoryResponse);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<CategoryResponseList> getAllCategories(@RequestParam(defaultValue = "flat") String format,
                                                                  @RequestParam(defaultValue = "false") Boolean topLevelOnly,
