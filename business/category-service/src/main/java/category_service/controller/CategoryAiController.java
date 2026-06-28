@@ -1,6 +1,7 @@
 package category_service.controller;
 
 import category_service.serviceinterface.ICategoryAIService;
+import com.umar.payload.request.category.ai.GenerateDescription;
 import com.umar.payload.request.category.ai.SuggestCategory;
 import com.umar.payload.response.category.ai.Suggestions;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,6 @@ public class CategoryAiController {
     @PostMapping("/generate-description")
     public ResponseEntity<Suggestions> generateDescription(@RequestBody GenerateDescription request){
         Suggestions suggestions = this.categoryAiService.generateDescription(request);
-        return ResponseEntity.ok(suggestions);
         return null;
     }
 }

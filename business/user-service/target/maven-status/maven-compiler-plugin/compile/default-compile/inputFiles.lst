@@ -2,6 +2,7 @@ D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\m
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\config\AiConfig.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\config\AuditConfig.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\config\ExceptionConfig.java
+D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\config\ExecutorConfig.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\config\KafkaProducerConfig.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\config\RedisConfig.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\config\SpringConfig.java
@@ -20,8 +21,10 @@ D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\m
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\model\CustomUserDetails.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\model\User.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\model\UserAuditLog.java
+D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\model\UserPreference.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\model\VerificationToken.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\repository\UserAuditLogRepository.java
+D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\repository\UserPreferenceRepository.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\repository\UserRepository.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\repository\VerificationTokenRepository.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\user-service\src\main\java\user_service\scheduler\InactiveUserScheduler.java

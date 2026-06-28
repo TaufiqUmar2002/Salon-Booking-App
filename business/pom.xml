@@ -28,6 +28,7 @@
         <module>notification-service</module>
         <module>ai-recommendation-service</module>
         <module>ai-assistant-service</module>
+        <module>eod-bod-service</module>
     </modules>
 
 </project>

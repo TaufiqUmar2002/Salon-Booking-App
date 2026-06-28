@@ -1,9 +1,9 @@
 Customer Profile:
 
-Hair Type: <hairType>
-Skin Type: <skinType>
-Interests: <interests>
-Budget: <budget>
+Hair Type: {hairType}
+Skin Type: {skinType}
+Interests: {interest}
+Budget: {budget}
 
 Generate personalized salon recommendations.
 
