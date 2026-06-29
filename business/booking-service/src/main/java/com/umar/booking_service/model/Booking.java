@@ -1,9 +1,16 @@
 package com.umar.booking_service.model;
 
-import com.umar.payload.constants.BookingStatus;
-import com.umar.payload.constants.CancelledBy;
+import com.umar.payload.enums.booking.BookingStatus;
+import com.umar.payload.enums.booking.CancelledBy;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -13,6 +20,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class Booking {
 
     @Id
@@ -34,8 +42,19 @@ public class Booking {
     private String currency;
     private String customerNotes;
     private Long kafkaOffset;
+
+    @CreatedDate
     private LocalDateTime createdAt;
+
+    @CreatedBy
+    private String createdBy;
+
+    @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    @LastModifiedBy
+    private String updatedBy;
+
     private LocalDateTime completedAt;
 
 

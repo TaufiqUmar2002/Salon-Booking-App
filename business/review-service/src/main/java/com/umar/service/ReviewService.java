@@ -7,7 +7,7 @@ import com.umar.exchange.BookingClient;
 import com.umar.mapper.ReviewMapper;
 import com.umar.model.Review;
 import com.umar.model.ReviewAuditLog;
-import com.umar.payload.constants.BookingStatus;
+import com.umar.payload.enums.booking.BookingStatus;
 import com.umar.payload.request.review.CreateReviewRequest;
 import com.umar.payload.request.review.DeleteReviewRequest;
 import com.umar.payload.response.booking.BookingResponseV1;
@@ -45,7 +45,7 @@ public class ReviewService implements IReviewService {
         }
         Integer reviewExistsWithGivenBooking = repository.getReviewByBookingId(request.getBookingId());
         if(reviewExistsWithGivenBooking>0){
-            throw new ApiException(HttpStatus.CONFLICT,"REVIEW_EXISTS","You have already submitted a review for this booking");
+            throw new ApiException(HttpStatus.CONFLICT,"REVIEW_EXISTS","review.alreadyExists");
         }
         Review review = Review.builder()
                 .salonId(request.getSalonId())
@@ -67,7 +67,7 @@ public class ReviewService implements IReviewService {
 
     @Override
     public void deleteReview(Long id, DeleteReviewRequest request) {
-        Review review = this.repository.findById(id).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"REVIEW_NOT_FOUND","'Review not found"));
+        Review review = this.repository.findById(id).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"REVIEW_NOT_FOUND","review.notFound"));
         if(review.getIsAdminDeleted().equals(Boolean.TRUE)){
             throw new ApiException(HttpStatus.FORBIDDEN,"FORBIDDEN","Review already deleted");
         }

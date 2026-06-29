@@ -1,6 +1,6 @@
 package com.umar.model;
 
-import com.umar.payload.constants.DeleteReview;
+import com.umar.payload.enums.review.DeleteReview;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

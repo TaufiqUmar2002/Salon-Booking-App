@@ -1,7 +1,7 @@
 package com.umar.booking_service.repository;
 
 import com.umar.booking_service.model.Booking;
-import com.umar.payload.constants.BookingStatus;
+import com.umar.payload.enums.booking.BookingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

@@ -1,6 +1,6 @@
 package com.umar.payload.request.review;
 
-import com.umar.payload.constants.DeleteReview;
+import com.umar.payload.enums.review.DeleteReview;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

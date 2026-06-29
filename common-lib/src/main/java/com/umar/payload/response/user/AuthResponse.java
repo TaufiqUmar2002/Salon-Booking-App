@@ -1,6 +1,6 @@
 package com.umar.payload.response.user;
 
-import com.umar.payload.constants.UserRole;
+import com.umar.payload.enums.user.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

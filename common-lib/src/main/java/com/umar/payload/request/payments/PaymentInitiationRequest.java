@@ -1,6 +1,6 @@
 package com.umar.payload.request.payments;
 
-import com.umar.payload.constants.PaymentMethod;
+import com.umar.payload.enums.payment.PaymentMethod;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

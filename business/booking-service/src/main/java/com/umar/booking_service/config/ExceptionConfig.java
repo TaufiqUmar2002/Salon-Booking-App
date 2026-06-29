@@ -1,6 +1,7 @@
 package com.umar.booking_service.config;
 
 import com.umar.exceptions.user.exceptionController.GlobalException;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -9,7 +10,7 @@ import org.springframework.context.annotation.Import;
 @Configuration
 public class ExceptionConfig {
     @Bean
-    public GlobalException bookingException(){
-        return new GlobalException();
+    public GlobalException bookingException(MessageSource messageSource){
+        return new GlobalException(messageSource);
     }
 }

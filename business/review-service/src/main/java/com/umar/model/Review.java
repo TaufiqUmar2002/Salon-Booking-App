@@ -1,6 +1,6 @@
 package com.umar.model;
 
-import com.umar.payload.constants.SentimentLabel;
+import com.umar.payload.enums.review.SentimentLabel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

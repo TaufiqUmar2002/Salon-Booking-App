@@ -3,7 +3,6 @@ package com.umar.payload.request.salon;
 
 
 
-import com.umar.payload.constants.Category;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

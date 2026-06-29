@@ -49,6 +49,12 @@ public class BookingController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/category/{categoryId}")
+    public ResponseEntity<UserBookingResponse> getBookingByCategoryId(@PathVariable Long categoryId){
+        UserBookingResponse response = this.bookingService.getBookingByCategory(categoryId);
+        return ResponseEntity.ok(response);
+    }
+
     @PutMapping("/{id}/cancel")
     public ResponseEntity<BookingResponse> cancelBooking(@PathVariable Long id, CancelBookingRequest cancelBookingRequest){
         BookingResponse response = this.bookingService.cancelBooking(cancelBookingRequest.getReason(),id);

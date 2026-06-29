@@ -10,7 +10,7 @@ import com.umar.booking_service.repository.BookingRepository;
 import com.umar.booking_service.serviceinterface.IBookingService;
 import com.umar.events.booking.BookingCreatedEvent;
 import com.umar.exceptions.common.exception.ApiException;
-import com.umar.payload.constants.BookingStatus;
+import com.umar.payload.enums.booking.BookingStatus;
 import com.umar.payload.request.booking.*;
 import com.umar.payload.response.booking.BookingAvailabilityResponse;
 import com.umar.payload.response.booking.BookingResponse;
@@ -115,7 +115,7 @@ public class BookingService implements IBookingService {
 
     @Override
     public BookingResponseV1 getBookingById(Long id) {
-        Booking booking = this.bookingRepository.findById(id).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"BOOKING_NOT_FOUND","Booking not found"));
+        Booking booking = this.bookingRepository.findById(id).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"BOOKING_NOT_FOUND","booking.notFound"));
         return bookingMapper.toResponseV1(booking);
     }
 
@@ -151,6 +151,11 @@ public class BookingService implements IBookingService {
 
     @Override
     public BookingResponse salonSummary(Long salonId) {
+        return null;
+    }
+
+    @Override
+    public UserBookingResponse getBookingByCategory(Long categoryId) {
         return null;
     }
 

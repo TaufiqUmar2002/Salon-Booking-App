@@ -1,6 +1,6 @@
 package com.umar.payload.response.booking;
 
-import com.umar.payload.constants.BookingStatus;
+import com.umar.payload.enums.booking.BookingStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

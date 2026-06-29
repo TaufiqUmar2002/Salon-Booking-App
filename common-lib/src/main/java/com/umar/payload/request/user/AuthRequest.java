@@ -1,6 +1,6 @@
 package com.umar.payload.request.user;
 
-import com.umar.payload.constants.UserRole;
+import com.umar.payload.enums.user.UserRole;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

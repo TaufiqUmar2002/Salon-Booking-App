@@ -1,6 +1,6 @@
 package com.umar.payload.request.user.ai;
 
-import com.umar.payload.constants.*;
+import com.umar.payload.enums.user.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

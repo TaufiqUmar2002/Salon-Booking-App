@@ -18,5 +18,6 @@ public interface IBookingService {
     BookingResponse completeBooking(Long id);
     BookingResponse noShowBooking(Long id);
     BookingResponse salonSummary(Long salonId);
+    UserBookingResponse getBookingByCategory(Long categoryId);
 
 }

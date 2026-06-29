@@ -1,6 +1,7 @@
 package com.umar.booking_service.exchange;
 
 import com.umar.payload.request.user.UserProfileResponse;
+import com.umar.payload.request.user.UserValidateResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,4 +11,7 @@ public interface UserClient {
 
     @GetMapping("/profile/{id}")
     UserProfileResponse viewUserProfile(@PathVariable Long id);
+
+    @GetMapping("/api/users/validate")
+    UserValidateResponse getUserValidation();
 }

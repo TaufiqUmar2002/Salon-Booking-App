@@ -1,6 +1,6 @@
 package com.umar.payload.response.review;
 
-import com.umar.payload.constants.SentimentLabel;
+import com.umar.payload.enums.review.SentimentLabel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
