@@ -1,0 +1,11 @@
+com\umar\config\KafkaConsumerConfig.class
+com\umar\events\CategoryEventConsumer.class
+com\umar\service\NotificationService.class
+com\umar\events\UserEventConsumer.class
+com\umar\model\NotificationLog.class
+com\umar\NotificationServiceApplication.class
+com\umar\model\UserNotificationPreference.class
+com\umar\repository\UserNotificationPreferenceRepository.class
+com\umar\model\UserNotificationPreference$UserNotificationPreferenceBuilder.class
+com\umar\model\NotificationLog$NotificationLogBuilder.class
+com\umar\repository\NotificationRepository.class

@@ -1,0 +1,50 @@
+server.port: 6009
+
+spring:
+  application:
+    name: NOTIFICATION-SERVICE
+  devtools:
+    add-properties: true
+
+  datasource:
+    url: jdbc:mysql://localhost:6003/app_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: app_user
+    password: app_password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+#
+#  datasource:
+#    url: jdbc:oracle:thin:@localhost:1521:xe?useSSL=false&serverTimezone=UTC
+#    username: Microservice
+#    password: umar
+#    driver-class-name: oracle.jdbc.OracleDriver
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.OracleDialect
+
+eureka:
+  instance:
+    prefer-ip-address : true
+  client:
+    fetch-registry : true
+    register-with-eureka : true
+    service-url:
+      defaultZone : http://localhost:4001/eureka/
+
+
+logging:
+  level:
+    org.springframework.cache: TRACE
+
+
+
+#
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: http://localhost:4001/eureka/
