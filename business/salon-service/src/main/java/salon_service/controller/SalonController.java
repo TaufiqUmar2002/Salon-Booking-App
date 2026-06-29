@@ -47,6 +47,12 @@ public class SalonController {
         return ResponseEntity.status(HttpStatus.OK).body(responseV1);
     }
 
+    @GetMapping("/{categoryId}")
+    public ResponseEntity<SalonResponseList> getSalonByCategory(@PathVariable("categoryId") Long categoryId){
+        SalonResponseList responseList = service.getSalonByCategory(categoryId);
+        return ResponseEntity.status(HttpStatus.OK).body(responseList);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<SalonResponseV1>  updateSalon(@Valid@RequestBody UpdateSalonRequest request,@PathVariable("id") Long id){
         SalonResponseV1 salonResponseV1 = service.updateSalon(request,id);

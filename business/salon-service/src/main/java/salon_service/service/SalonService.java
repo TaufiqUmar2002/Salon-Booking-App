@@ -29,6 +29,7 @@ import salon_service.serviceinterface.ISalonService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 
 @Service
@@ -40,6 +41,7 @@ public class SalonService implements ISalonService {
     private final SalonMapper mapper;
     private final SalonEventProducer eventProducer;
     private final SalonAuditRepository auditRepository;
+    private final Executor executor;
 
 
     @Override
@@ -47,15 +49,17 @@ public class SalonService implements ISalonService {
         UserValidateResponse response = userClient.getUserValidation();
         Optional<Salon> ifPresent = salonRepository.findSalonByNameAndOwnerId(request.getName(),response.getUserId());
         if(ifPresent.isPresent()){
-            throw new ApiException(HttpStatus.NOT_ACCEPTABLE,"DUPLICATE_REQUEST","A salon with this name already exists at this address");
+            throw new ApiException(HttpStatus.NOT_ACCEPTABLE,"DUPLICATE_REQUEST","salon.alreadyExists");
         }
         Salon salon = mapper.toEntity(request);
         salon.setIsActive(false);
         Salon savedSalon = salonRepository.save(salon);
         SalonResponse salonResponse = mapper.toResponse(savedSalon);
-        salonResponse.setMessage("Registration submitted. Your salon will be visible after verification.");
-        SalonCreatedEvent salonCreatedEvent = new SalonCreatedEvent();
-        eventProducer.publishSalonCreationEvent(salonCreatedEvent);
+        salonResponse.setMessage("salon.registrationSubmitted");
+        executor.execute(()->{
+            SalonCreatedEvent salonCreatedEvent = new SalonCreatedEvent();
+            eventProducer.publishSalonCreationEvent(salonCreatedEvent);
+        });
         return salonResponse;
     }
 
@@ -95,9 +99,9 @@ public class SalonService implements ISalonService {
 
     @Override
     public void deleteSalon(DeleteSalonRequest request, Long salonId) {
-        Salon salon = salonRepository.findById(salonId).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "SALON_NOT_FOUND", "No Salon found with given id"));
+        Salon salon = salonRepository.findById(salonId).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "SALON_NOT_FOUND", "salon.notFound"));
         if (!salon.getIsActive()) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "ALREADY_INACTIVE", "");
+            throw new ApiException(HttpStatus.BAD_REQUEST, "ALREADY_INACTIVE", "salon.inactive");
         }
         salon.setIsActive(false);
         salonRepository.save(salon);
@@ -110,6 +114,11 @@ public class SalonService implements ISalonService {
         auditRepository.save(auditLog);
         SalonCreatedEvent salonCreatedEvent = new SalonCreatedEvent();
         eventProducer.publishSalonCreationEvent(salonCreatedEvent);
+    }
+
+    @Override
+    public SalonResponseList getSalonByCategory(Long salonId) {
+        return null;
     }
 
     public SalonResponseList convertToSalonResponseList(Page<Salon> salonPage) {

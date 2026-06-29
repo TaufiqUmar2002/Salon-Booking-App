@@ -18,6 +18,7 @@ public interface ISalonService {
     SalonResponseV1 getSalonById(Long id);
     SalonResponseV1 updateSalon(UpdateSalonRequest request,Long salonId);
     void  deleteSalon(DeleteSalonRequest request,Long id);
+    SalonResponseList getSalonByCategory(Long salonId);
 
 
 }
