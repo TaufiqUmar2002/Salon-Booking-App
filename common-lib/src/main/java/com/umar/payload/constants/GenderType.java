@@ -1,4 +1,4 @@
-package com.umar.service_offering.enums;
+package com.umar.payload.constants;
 
 public enum GenderType {
     MEN,

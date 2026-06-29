@@ -1,15 +1,16 @@
 package com.umar.service_offering.service;
 
-import com.umar.events.services.BatchValidationException;
-import com.umar.events.services.UpdateServiceEvent;
+import com.umar.events.services.*;
 import com.umar.exceptions.common.exception.ApiException;
 import com.umar.payload.request.services.*;
-import com.umar.payload.response.category.LookupCategoryResponse;
+import com.umar.payload.request.user.UserValidateResponse;
+import com.umar.payload.response.category.CategoryResponse;
 import com.umar.payload.response.services.BulkUpdateServiceResponse;
 import com.umar.payload.response.services.SearchServiceResponseList;
 import com.umar.payload.response.services.ServiceResponse;
 import com.umar.service_offering.event.ServiceOfferingEventProducer;
 import com.umar.service_offering.exchange.CategoryClient;
+import com.umar.service_offering.exchange.UserClient;
 import com.umar.service_offering.mapper.ServiceMapper;
 import com.umar.service_offering.model.ServiceOffering;
 import com.umar.service_offering.model.ServicePriceHistory;
@@ -22,13 +23,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,16 +43,51 @@ public class ServiceOfferingService implements IServiceOfferingService {
     private final ServiceMapper serviceMapper;
     private final ServicePriceHistoryRepository historyRepository;
     private final ServiceOfferingEventProducer eventProducer;
-
+    private final UserClient userClient;
+    private final Executor executor;
 
     @Override
     public ServiceResponse createServiceOffering(CreateServiceRequest request) {
-        LookupCategoryResponse lookupCategoryResponse =categoryClient.lookUpCategory(Collections.singletonList(request.getCategoryId()));
-        if(!lookupCategoryResponse.getLookupCategoryList().get(0).getIsActive()){
-            throw new ApiException(HttpStatus.NOT_ACCEPTABLE,"CATEGORY_INACTIVE","");
+        UserValidateResponse response = this.userClient.getUserValidation();
+        CategoryResponse categoryResponse =categoryClient.getCategoryById(request.getCategoryId());
+        if(!categoryResponse.getIsActive()){
+            throw new ApiException(HttpStatus.NOT_ACCEPTABLE,"CATEGORY_INACTIVE","category.inActive");
         }
-        /* write history and save data and publish kafka event*/
-        return null;
+        if(request.getRequiresDeposit()==Boolean.TRUE && request.getDepositAmount() ==null){
+            throw new ApiException(HttpStatus.BAD_REQUEST,"DEPOSIT_INCONSISTENT","service.depositInconsistent");
+        }
+        if(request.getAvailableFromTime() !=null && request.getAvailableToTime()!=null && request.getAvailableFromTime().isAfter(request.getAvailableToTime())){
+            throw new ApiException(HttpStatus.BAD_REQUEST,"TIME_INCONSISTENT","service.timeInconsistent");
+
+        }
+        ServiceOffering serviceOffering =ServiceOffering.builder()
+                .serviceType(null)
+                .bufferAfterMinutes(0)
+                .bufferBeforeMinutes(0)
+                .isActive(Boolean.TRUE)
+                .requiredDeposit(request.getRequiresDeposit())
+                .depositAmount(request.getDepositAmount())
+                .name(request.getName())
+                .description(request.getDescription())
+                .categoryId(request.getCategoryId())
+                .build();
+        ServiceOffering savedServiceOffering = repository.save(serviceOffering);
+        ServicePriceHistory servicePriceHistory = ServicePriceHistory.builder()
+                .serviceId(savedServiceOffering.getId())
+                .newPrice(savedServiceOffering.getPrice())
+                .build();
+        historyRepository.save(servicePriceHistory);
+        executor.execute(()->{
+            ServiceCreatedEvent event = ServiceCreatedEvent.builder()
+                    .categoryId(request.getCategoryId())
+                    .serviceId(savedServiceOffering.getId())
+                    .isActive(Boolean.TRUE)
+                    .name(request.getName())
+                    .price(request.getPrice())
+                    .build();
+            eventProducer.publishServiceCreatedEvent(event);
+        });
+        return serviceMapper.toResponse(savedServiceOffering);
     }
 
     @Override
@@ -61,20 +99,23 @@ public class ServiceOfferingService implements IServiceOfferingService {
 
     @Override
     public ServiceResponse getAllServicesById(Long id) {
-        ServiceOffering serviceOffering = this.repository.findById(id).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"SERVICE_NOT_FOUND","Service Not found with given id"));
+        ServiceOffering serviceOffering = this.repository.findById(id).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"SERVICE_NOT_FOUND","service.notFound"));
         return serviceMapper.toResponse(serviceOffering);
     }
 
     @Override
     public ServiceResponse updateService(Long id, UpdateServiceRequest request) {
-        ServiceOffering serviceOffering = this.repository.findById(id).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"SERVICE_NOT_FOUND","Service Not found with given id"));
+        ServiceOffering serviceOffering = this.repository.findById(id).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"SERVICE_NOT_FOUND","service.notFound"));
         if(request.getRequiresDeposit() && (request.getDepositAmount()==null || request.getDepositAmount().equals(BigDecimal.ZERO))){
-            throw new ApiException(HttpStatus.BAD_REQUEST,"DEPOSIT_INCONSISTENT","'depositAmount is required when requiresDeposit is true");
+            throw new ApiException(HttpStatus.BAD_REQUEST,"DEPOSIT_INCONSISTENT","service.depositInconsistent");
         }
-        /* category not found handling*/
+        CategoryResponse categoryResponse = categoryClient.getCategoryById(request.getCategoryId());
+        if(!categoryResponse.getIsActive()){
+            throw new ApiException(HttpStatus.NOT_ACCEPTABLE,"CATEGORY_INACTIVE","category.inActive");
+        }
         ServiceOffering existingService = this.repository.findServiceOfferingByName(request.getName());
         if(existingService!=null){
-            throw new ApiException(HttpStatus.BAD_REQUEST,"DUPLICATE_NAME","A service with this name already exists in your salon");
+            throw new ApiException(HttpStatus.BAD_REQUEST,"DUPLICATE_NAME","service.duplicateName");
         }
         if(request.getPrice()!=null && !request.getPrice().equals(serviceOffering.getPrice())){
             ServicePriceHistory priceHistory = ServicePriceHistory.builder()
@@ -88,36 +129,48 @@ public class ServiceOfferingService implements IServiceOfferingService {
         }
         serviceMapper.UpdateServiceFromRequest(request,serviceOffering);
         repository.save(serviceOffering);
-        eventProducer.publishServiceUpdateEvent(new UpdateServiceEvent());
+        executor.execute(()->{
+            UpdateServiceEvent updateServiceEvent = UpdateServiceEvent.builder()
+                            .serviceId(serviceOffering.getId())
+                            .salonId(serviceOffering.getSalonId())
+                            .build();
+            eventProducer.publishServiceUpdateEvent(updateServiceEvent);
+        });
         return serviceMapper.toResponse(serviceOffering);
     }
 
     @Override
     public void deleteService(Long id, DeleteServiceRequest request) {
-        ServiceOffering serviceOffering = this.repository.findById(id).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"SERVICE_NOT_FOUND","Service Not found with given id"));
+        ServiceOffering serviceOffering = this.repository.findById(id).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"SERVICE_NOT_FOUND","service.notFound"));
         if(!serviceOffering.getIsActive()){
-            throw new ApiException(HttpStatus.BAD_REQUEST,"ALREADY_INACTIVE","This service is already inactive");
+            throw new ApiException(HttpStatus.BAD_REQUEST,"ALREADY_INACTIVE","service.alreadyInactive");
         }
-        eventProducer.publishServiceDeleteEvent(new DeleteServiceEvent());
         serviceOffering.setIsActive(false);
         repository.save(serviceOffering);
+        executor.execute(()->{
+            DeleteServiceEvent deleteServiceEvent = DeleteServiceEvent.builder()
+                            .serviceId(serviceOffering.getId())
+                            .salonId(serviceOffering.getSalonId())
+                            .build();
+            eventProducer.publishServiceDeleteEvent(deleteServiceEvent);
+        });
     }
 
     @Override
     public BulkUpdateServiceResponse bulkUpdateService(BulkUpdateServiceRequest serviceRequest) {
         Map<String, String> errorMap = new HashMap<>();
+        UserValidateResponse response = userClient.getUserValidation();;
         if(serviceRequest.getUpdates().size()>50){
-            throw new ApiException(HttpStatus.BAD_REQUEST,"BATCH_TOO_LARGE","'Maximum 50 services per bulk update request");
+            throw new ApiException(HttpStatus.BAD_REQUEST,"BATCH_TOO_LARGE","service.batchToLarge");
         }
         List<Long> ids  = serviceRequest.getUpdates().stream().map(BulkUpdateServiceRequest.ServiceUpdateItem::getServiceId).toList();
         List<ServiceOffering> existingServices = repository.findAllById(ids);
-        Long currentUserId = 77823923L;//get current logged in user
+        Long currentUserId = response.getUserId();
         Map<Long,ServiceOffering> serviceMap = existingServices.stream().collect(Collectors.toMap(ServiceOffering::getId,s->s));
         for(BulkUpdateServiceRequest.ServiceUpdateItem serviceUpdateItem : serviceRequest.getUpdates()){
             ServiceOffering offering = serviceMap.get(serviceUpdateItem.getServiceId());
             if(offering==null){
                 errorMap.put("id_" + serviceUpdateItem.getServiceId(), "Service not found");
-                //find owning salon and then its ownerid
             } else if (offering.getIsActive().equals(currentUserId)) {
                 errorMap.put("id_" + offering.getId(), "Not authorized to update this service");
             }
@@ -129,7 +182,13 @@ public class ServiceOfferingService implements IServiceOfferingService {
         BulkUpdateServiceResponse serviceResponse = new BulkUpdateServiceResponse();
         serviceResponse.setUpdatedCount((long) serviceOfferingList.size());
         List<Long> idList  = serviceOfferingList.stream().map(ServiceOffering::getId).toList();
-        eventProducer.publishBulkServiceUpdateEvent(new DeleteServiceEvent());
+        executor.execute(()->{
+            BulkServiceUpdateEvent updateEvent =BulkServiceUpdateEvent.builder()
+                    .affectedServiceIds(idList)
+                    .updatedAt(LocalDateTime.now())
+                    .build();
+            eventProducer.publishBulkServiceUpdateEvent(updateEvent);
+        });
         serviceResponse.setUpdatedIds(idList);
         return serviceResponse;
     }
@@ -157,13 +216,33 @@ public class ServiceOfferingService implements IServiceOfferingService {
                 .oldPrice(null)
                 .serviceId(persistedService.getId())
                 .build();
-        eventProducer.publishBulkServiceUpdateEvent(new DeleteServiceEvent());
+        executor.execute(()->{
+            CloneServiceEvent cloneServiceEvent =CloneServiceEvent.builder()
+                    .sourceServiceId(id)
+                    .newServiceId(persistedService.getId())
+                    .salonId(serviceOffering.getSalonId())
+                    .build();
+            eventProducer.publishCloneServiceEvent(cloneServiceEvent);
+        });
         historyRepository.save(priceHistory);
         return serviceMapper.toResponse(persistedService);
     }
 
     @Override
     public SearchServiceResponseList searchService(ServiceSearchRequest request) {
+        Pageable pageable = PageRequest.of(request.getPage(), request.getSize());
+        List<ServiceOffering> serviceOfferingList = this.repository.searchServices(request.getQuery(), request.getSalonId(),
+                request.getCategoryId(), request.getMinPrice(), request.getMaxPrice(), request.getMaxDuration(), pageable);
+        SearchServiceResponseList responseList = new SearchServiceResponseList();
+        responseList.setResponseList(serviceOfferingList.stream().map(serviceMapper::toSearchResponse).toList());
+        return responseList;
+    }
+
+    public String getCurrentLoggedInUser(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication!=null && authentication.getPrincipal()!=null && authentication.getPrincipal() instanceof String userDetails){
+            return userDetails;
+        }
         return null;
     }
 

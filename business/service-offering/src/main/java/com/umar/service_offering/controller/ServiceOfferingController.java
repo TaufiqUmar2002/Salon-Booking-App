@@ -67,12 +67,7 @@ public class ServiceOfferingController {
     @GetMapping("/search")
     public ResponseEntity<SearchServiceResponseList> searchService(@ModelAttribute ServiceSearchRequest request){
         SearchServiceResponseList responseList = service.searchService(request);
-        return null;
-    }
-
-    @GetMapping("/")
-    public String home(){
-        return "This is service offering microservice";
+        return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 
 }

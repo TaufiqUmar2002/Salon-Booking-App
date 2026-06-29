@@ -21,7 +21,7 @@ public class CategoryResponse {
     private String iconUrl;
     private Integer displayOrder;
     private Boolean isFeatured;
-
+    private Boolean isActive;
     private Integer salonCount;
     private Integer bookingCount;
 

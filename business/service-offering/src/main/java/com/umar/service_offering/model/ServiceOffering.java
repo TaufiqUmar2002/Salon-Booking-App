@@ -1,14 +1,15 @@
 package com.umar.service_offering.model;
 
-import com.umar.service_offering.enums.GenderType;
-import com.umar.service_offering.enums.ServiceType;
+
+import com.umar.payload.constants.GenderType;
+import com.umar.payload.constants.ServiceType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -123,15 +124,19 @@ public class ServiceOffering  {
     @Column(name = "total_reviews")
     private Integer totalReviews = 0;
 
+    @CreatedBy
     @Column(name = "created_by", nullable = false)
     private Long createdBy;
 
+    @LastModifiedBy
     @Column(name = "updated_by")
     private Long updatedBy;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+
 
     @UpdateTimestamp
     @Column(name = "updated_at")

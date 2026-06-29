@@ -1,6 +1,7 @@
 package com.umar.service_offering.mapper;
 
 import com.umar.payload.request.services.UpdateServiceRequest;
+import com.umar.payload.response.services.SearchServiceResponseList;
 import com.umar.payload.response.services.ServiceResponse;
 import com.umar.service_offering.model.ServiceOffering;
 import java.util.ArrayList;
@@ -10,8 +11,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-02T08:40:16+0530",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 23 (Oracle Corporation)"
+    date = "2026-06-29T08:11:47+0530",
+    comments = "version: 1.6.3, compiler: javac, environment: Java 23 (Oracle Corporation)"
 )
 @Component
 public class ServiceMapperImpl implements ServiceMapper {
@@ -30,6 +31,7 @@ public class ServiceMapperImpl implements ServiceMapper {
         serviceResponse.durationMinutes( serviceOffering.getDurationMinutes() );
         serviceResponse.isActive( serviceOffering.getIsActive() );
         serviceResponse.isFeatured( serviceOffering.getIsFeatured() );
+        serviceResponse.bookingCount( serviceOffering.getBookingCount() );
         serviceResponse.imageUrl( serviceOffering.getImageUrl() );
 
         return serviceResponse.build();
@@ -94,5 +96,16 @@ public class ServiceMapperImpl implements ServiceMapper {
                 serviceOffering.setTags( new ArrayList<String>( list1 ) );
             }
         }
+    }
+
+    @Override
+    public SearchServiceResponseList.SearchServiceResponse toSearchResponse(ServiceOffering serviceOffering) {
+        if ( serviceOffering == null ) {
+            return null;
+        }
+
+        SearchServiceResponseList.SearchServiceResponse.SearchServiceResponseBuilder searchServiceResponse = SearchServiceResponseList.SearchServiceResponse.builder();
+
+        return searchServiceResponse.build();
     }
 }

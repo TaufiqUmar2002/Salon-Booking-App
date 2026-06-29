@@ -9,6 +9,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
+
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Set;
 
 public interface ServiceOfferingRepository extends JpaRepository<ServiceOffering,Long> {
@@ -26,4 +29,10 @@ public interface ServiceOfferingRepository extends JpaRepository<ServiceOffering
     Page<ServiceOffering> searchServiceBySalonId(@Param("salonId") Long salonId, @Param("categoryId") Long categoryId, Pageable pageable);
 
     ServiceOffering findServiceOfferingByName(String name);
+
+    @Query("""
+    select so from ServiceOffering so where so.salonId=:salonId and so.categoryId=:categoryId and so.name like %:query% and so.price between :minPrice and :maxPrice and so.duration <= :maxDuration
+    """)
+    List<ServiceOffering> searchServices(String query, Long salonId, Long categoryId, BigDecimal minPrice, BigDecimal maxPrice, Integer maxDuration, Pageable pageable);
+
 }

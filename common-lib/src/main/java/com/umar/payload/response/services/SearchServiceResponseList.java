@@ -31,7 +31,7 @@ public class SearchServiceResponseList {
     @NoArgsConstructor
     @Builder
     @Data
-    static class SearchServiceResponse{
+    public static class SearchServiceResponse{
 
         private Long serviceId;
 
