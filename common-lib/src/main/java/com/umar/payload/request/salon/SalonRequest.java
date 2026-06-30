@@ -3,6 +3,7 @@ package com.umar.payload.request.salon;
 
 
 
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,31 +21,20 @@ import java.util.Map;
 public class SalonRequest {
 
     private String name;
-
-    private Long category;
-
+    private Long categoryId;
     private String addressLine1;
-
     private String city;
-
     private String state;
-
     private String  postalCode;
-
     private Double latitude;
-
     private Double longitude;
-
     private String phone;
-
     private Map<String, String> openingHours = new HashMap<>();
-
     private List<ServiceSummary> services = new ArrayList<>();
-
-
     private String description;
-
+    @Email
     private String email;
-
+    private String reason;
     private String website;
+    private List<String> galleryUrls;
 }

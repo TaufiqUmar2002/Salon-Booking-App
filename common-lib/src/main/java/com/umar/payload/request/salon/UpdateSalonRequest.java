@@ -16,10 +16,18 @@ public class UpdateSalonRequest {
 
     private String name;
     private String description;
-    private String category;
+    private Long categoryId;
     private String phone;
     private String email;
     private String website;
+    private String addressLine1;
+    private String city;
+    private String state;
+    private String country;
+    private String postalCode;
+    private Double latitude;
+    private Double longitude;
+    private String reason;
     private Map<String, String> openingHours;
     private List<ServiceSummary> services;
     private Boolean isVerified;

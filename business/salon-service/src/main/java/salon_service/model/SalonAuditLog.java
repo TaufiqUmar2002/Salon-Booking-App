@@ -24,6 +24,7 @@ public class SalonAuditLog {
 
     private Long salonId;
 
+
     private String reason;
 
     private Long ownerId;

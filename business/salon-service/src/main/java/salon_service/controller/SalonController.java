@@ -28,9 +28,9 @@ public class SalonController {
     private final ISalonService service;
 
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SALON_OWNER')")
     @PostMapping
-    public ResponseEntity<SalonResponse> createSalon(@RequestBody SalonRequest request, HttpServletRequest servletRequest){
+    public ResponseEntity<SalonResponse> createSalon(@Valid @RequestBody SalonRequest request){
         SalonResponse response = service.createSalon(request);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -47,21 +47,24 @@ public class SalonController {
         return ResponseEntity.status(HttpStatus.OK).body(responseV1);
     }
 
-    @GetMapping("/{categoryId}")
+    @GetMapping("/category/{categoryId}")
     public ResponseEntity<SalonResponseList> getSalonByCategory(@PathVariable("categoryId") Long categoryId){
         SalonResponseList responseList = service.getSalonByCategory(categoryId);
         return ResponseEntity.status(HttpStatus.OK).body(responseList);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SALON_OWNER')")
     @PutMapping("/{id}")
     public ResponseEntity<SalonResponseV1>  updateSalon(@Valid@RequestBody UpdateSalonRequest request,@PathVariable("id") Long id){
         SalonResponseV1 salonResponseV1 = service.updateSalon(request,id);
         return ResponseEntity.status(HttpStatus.OK).body(salonResponseV1);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSalon(@Valid @RequestBody DeleteSalonRequest request, @PathVariable("id") Long id){
-        return null;
+         this.service.deleteSalon(request,id);
+        return ResponseEntity.noContent().build();
     }
 
 

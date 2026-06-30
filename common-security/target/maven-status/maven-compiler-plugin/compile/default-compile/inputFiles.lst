@@ -3,4 +3,5 @@ D:\Backend\Projects\Microservices\Salon\Microservice\common-security\src\main\ja
 D:\Backend\Projects\Microservices\Salon\Microservice\common-security\src\main\java\com\umar\config\ExceptionConfig.java
 D:\Backend\Projects\Microservices\Salon\Microservice\common-security\src\main\java\com\umar\constant\JwtConstant.java
 D:\Backend\Projects\Microservices\Salon\Microservice\common-security\src\main\java\com\umar\filter\JwtAuthenticationFilter.java
+D:\Backend\Projects\Microservices\Salon\Microservice\common-security\src\main\java\com\umar\util\CustomAccessDeniedHandler.java
 D:\Backend\Projects\Microservices\Salon\Microservice\common-security\src\main\java\com\umar\util\JwtUtil.java

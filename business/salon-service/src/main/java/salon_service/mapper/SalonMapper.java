@@ -11,7 +11,6 @@ import salon_service.model.Salon;
 @Mapper(componentModel = "spring")
 public interface SalonMapper {
 
-    @Mapping(target = "categoryId",source = "category")
     Salon toEntity(SalonRequest request);
 
     @Mapping(target = "salonId",source = "id")

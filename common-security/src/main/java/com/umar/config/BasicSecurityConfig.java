@@ -1,20 +1,34 @@
 package com.umar.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umar.filter.JwtAuthenticationFilter;
+import com.umar.util.CustomAccessDeniedHandler;
 import com.umar.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@EnableMethodSecurity
+@EnableWebSecurity
 public class BasicSecurityConfig {
+
+
+
+    @ConditionalOnMissingBean(name = "customAccessDeniedHandler")
+    @Bean
+    public CustomAccessDeniedHandler customAccessDeniedHandler(ObjectMapper objectMapper) {
+        return new CustomAccessDeniedHandler(objectMapper);
+    }
 
     @ConditionalOnMissingBean(name = "jwtUtil")
     @Bean
@@ -34,14 +48,20 @@ public class BasicSecurityConfig {
                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET,"/api/booking")
+                        .requestMatchers(HttpMethod.GET,"/api/booking"
+                        ,"/api/salon"
+                        ,"/api/salon/**"
+                        ,"/api/salon/ai/search")
                         .permitAll()
 
                         .anyRequest()
                         .authenticated()
                 )
-                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(ex -> ex
+                        .accessDeniedHandler(customAccessDeniedHandler(new ObjectMapper()))
+                );
         return http.build();
     }
 

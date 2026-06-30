@@ -3,16 +3,18 @@ package salon_service.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import salon_service.model.Salon;
 
+import java.util.List;
 import java.util.Optional;
 
 
 @Repository
-public interface SalonRepository extends JpaRepository<Salon,Long>{
+public interface SalonRepository extends JpaRepository<Salon,Long>, JpaSpecificationExecutor<Salon> {
 
     Salon findByOwnerId(Long ownerId);
 
@@ -88,5 +90,11 @@ public interface SalonRepository extends JpaRepository<Salon,Long>{
             @Param("lng") Double lng,
             @Param("radius") Double radius,
             Pageable pageable);
+
+    @Query("select count(s) from Salon s where s.slug=:slug")
+    Integer existsBySlug(String slug);
+
+    @Query("select s from Salon s where s.categoryId=:categoryId")
+    Optional<List<Salon>> findByCategoryId(Long categoryId);
 
 }

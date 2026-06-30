@@ -17,7 +17,7 @@ public class ServiceSummary {
     @Column(name = "service_name", nullable = false)
     private String name;
 
-    @Column(name = "duration_minutes", nullable = false)
+    @Column(name = "duration_minutes",nullable = true)
     private Integer durationMinutes;
 
     @Column(nullable = false, precision = 10, scale = 2)

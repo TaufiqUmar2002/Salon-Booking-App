@@ -30,6 +30,8 @@ public class Salon {
     @Column(nullable = false)
     private String name;
 
+    private String slug;
+
     private String description;
 
     @Column(name = "category_id", nullable = false)

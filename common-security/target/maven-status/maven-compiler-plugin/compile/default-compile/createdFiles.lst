@@ -4,3 +4,4 @@ com\umar\config\ExceptionConfig.class
 com\umar\config\BasicSecurityConfig.class
 com\umar\util\JwtUtil.class
 com\umar\constant\JwtConstant.class
+com\umar\util\CustomAccessDeniedHandler.class

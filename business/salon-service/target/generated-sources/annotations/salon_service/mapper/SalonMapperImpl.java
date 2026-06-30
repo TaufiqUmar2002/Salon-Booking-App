@@ -15,7 +15,7 @@ import salon_service.model.ServiceSummary;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-29T08:11:44+0530",
+    date = "2026-06-30T23:46:28+0530",
     comments = "version: 1.6.3, compiler: javac, environment: Java 23 (Oracle Corporation)"
 )
 @Component
@@ -29,9 +29,9 @@ public class SalonMapperImpl implements SalonMapper {
 
         Salon.SalonBuilder salon = Salon.builder();
 
-        salon.categoryId( request.getCategory() );
         salon.name( request.getName() );
         salon.description( request.getDescription() );
+        salon.categoryId( request.getCategoryId() );
         salon.addressLine1( request.getAddressLine1() );
         salon.city( request.getCity() );
         salon.state( request.getState() );
@@ -46,6 +46,10 @@ public class SalonMapperImpl implements SalonMapper {
             salon.openingHours( new LinkedHashMap<String, String>( map ) );
         }
         salon.services( serviceSummaryListToServiceSummaryList( request.getServices() ) );
+        List<String> list1 = request.getGalleryUrls();
+        if ( list1 != null ) {
+            salon.galleryUrls( new ArrayList<String>( list1 ) );
+        }
 
         return salon.build();
     }
@@ -108,6 +112,27 @@ public class SalonMapperImpl implements SalonMapper {
         if ( request.getDescription() != null ) {
             salon.setDescription( request.getDescription() );
         }
+        if ( request.getCategoryId() != null ) {
+            salon.setCategoryId( request.getCategoryId() );
+        }
+        if ( request.getAddressLine1() != null ) {
+            salon.setAddressLine1( request.getAddressLine1() );
+        }
+        if ( request.getCity() != null ) {
+            salon.setCity( request.getCity() );
+        }
+        if ( request.getState() != null ) {
+            salon.setState( request.getState() );
+        }
+        if ( request.getPostalCode() != null ) {
+            salon.setPostalCode( request.getPostalCode() );
+        }
+        if ( request.getLatitude() != null ) {
+            salon.setLatitude( request.getLatitude() );
+        }
+        if ( request.getLongitude() != null ) {
+            salon.setLongitude( request.getLongitude() );
+        }
         if ( request.getPhone() != null ) {
             salon.setPhone( request.getPhone() );
         }
@@ -155,7 +180,6 @@ public class SalonMapperImpl implements SalonMapper {
 
         ServiceSummary.ServiceSummaryBuilder serviceSummary1 = ServiceSummary.builder();
 
-        serviceSummary1.name( serviceSummary.getName() );
         serviceSummary1.durationMinutes( serviceSummary.getDurationMinutes() );
         serviceSummary1.price( serviceSummary.getPrice() );
 
@@ -182,7 +206,6 @@ public class SalonMapperImpl implements SalonMapper {
 
         com.umar.payload.request.salon.ServiceSummary.ServiceSummaryBuilder serviceSummary1 = com.umar.payload.request.salon.ServiceSummary.builder();
 
-        serviceSummary1.name( serviceSummary.getName() );
         serviceSummary1.durationMinutes( serviceSummary.getDurationMinutes() );
         serviceSummary1.price( serviceSummary.getPrice() );
 
