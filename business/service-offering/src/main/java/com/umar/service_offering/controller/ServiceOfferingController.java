@@ -20,14 +20,14 @@ public class ServiceOfferingController {
 
     private final IServiceOfferingService service;
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('SALON_OWNER')")
     @PostMapping
     public ResponseEntity<ServiceResponse> createService(@Valid @RequestBody CreateServiceRequest request){
-        ServiceResponse response=service.createServiceOffering(request);
+        ServiceResponse response = this.service.createServiceOffering(request);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SALON_OWNER')")
     @GetMapping("/salon/{salonId}")
     public ResponseEntity<Page<ServiceResponse>> getServiceBySalonId(@PathVariable Long salonId, @ModelAttribute ServiceSalonSearchRequest request){
         Page<ServiceResponse> serviceResponsePage = service.getAllServicesBySalonId(salonId,request);
@@ -35,30 +35,30 @@ public class ServiceOfferingController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ServiceResponse> getServiceById(@PathVariable Long id){
+    public ResponseEntity<ServiceResponse> getServiceById(@PathVariable("id") Long id){
         ServiceResponse serviceResponse = service.getAllServicesById(id);
         return ResponseEntity.ok(serviceResponse);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ServiceResponse> updateService(@PathVariable Long id,@RequestBody UpdateServiceRequest request){
+    public ResponseEntity<ServiceResponse> updateService(@PathVariable Long id,@Valid@RequestBody UpdateServiceRequest request){
         ServiceResponse serviceResponse = service.updateService(id,request);
         return ResponseEntity.status(HttpStatus.OK).body(serviceResponse);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteService(@PathVariable Long id,@RequestBody DeleteServiceRequest request){
+    public ResponseEntity<Void> deleteService(@PathVariable Long id,@Valid@RequestBody DeleteServiceRequest request){
         service.deleteService(id,request);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/bulk-update")
-    public ResponseEntity<BulkUpdateServiceResponse> serviceBulkUpdate(@RequestBody BulkUpdateServiceRequest bulkUpdateServiceRequest){
+    @PostMapping("/bulkUpdate")
+    public ResponseEntity<BulkUpdateServiceResponse> serviceBulkUpdate(@Valid @RequestBody BulkUpdateServiceRequest bulkUpdateServiceRequest){
         BulkUpdateServiceResponse serviceResponse = this.service.bulkUpdateService(bulkUpdateServiceRequest);
         return ResponseEntity.status(HttpStatus.OK).body(serviceResponse);
     }
 
-    @PostMapping("{id}/clone")
+    @PostMapping("/{id}/clone")
     public ResponseEntity<ServiceResponse> cloneService(@PathVariable Long id,@RequestBody@Valid CloneServiceRequest request){
         ServiceResponse cloneServiceResponse =service.cloneService(id,request);
         return ResponseEntity.status(HttpStatus.OK).body(cloneServiceResponse);

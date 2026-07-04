@@ -31,7 +31,7 @@ public interface ServiceOfferingRepository extends JpaRepository<ServiceOffering
     ServiceOffering findServiceOfferingByName(String name);
 
     @Query("""
-    select so from ServiceOffering so where so.salonId=:salonId and so.categoryId=:categoryId and so.name like %:query% and so.price between :minPrice and :maxPrice and so.duration <= :maxDuration
+    select so from ServiceOffering so where so.salonId=:salonId and so.categoryId=:categoryId and so.name like %:query% and so.price between :minPrice and :maxPrice and so.durationMinutes <= :maxDuration
     """)
     List<ServiceOffering> searchServices(String query, Long salonId, Long categoryId, BigDecimal minPrice, BigDecimal maxPrice, Integer maxDuration, Pageable pageable);
 

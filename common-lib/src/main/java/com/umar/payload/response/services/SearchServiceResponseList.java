@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor
@@ -13,15 +15,16 @@ import java.util.List;
 @Builder
 public class SearchServiceResponseList {
 
-    private List<SearchServiceResponse> responseList;
+    private List<SearchServiceResponse> responseList = new ArrayList<>();
 
-    private Long totalResult;
+    private Integer totalResult;
     private Integer totalPages;
-    private String name;
     private Long salonId;
     private String salonName;
     private Long categoryId;
-    private String price;
+    private BigDecimal MinPrice;
+    private BigDecimal maxPrice;
+    private BigDecimal averagePrice;
     private Integer durationMinutes;
     private Double averageRating;
     private Double relevanceScore;
@@ -34,6 +37,7 @@ public class SearchServiceResponseList {
     public static class SearchServiceResponse{
 
         private Long serviceId;
+        private String serviceName;
 
     }
 

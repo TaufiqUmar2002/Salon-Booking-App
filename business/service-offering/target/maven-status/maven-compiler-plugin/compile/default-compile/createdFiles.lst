@@ -2,10 +2,13 @@ com\umar\service_offering\serviceinterface\IServiceOfferingService.class
 com\umar\service_offering\mapper\ServiceMapperImpl.class
 com\umar\service_offering\exchange\FeignJwtInterceptor.class
 com\umar\service_offering\model\ServiceOffering.class
+com\umar\service_offering\exchange\SalonClient.class
 com\umar\service_offering\exchange\GlobalFeignErrorDecoder.class
 com\umar\service_offering\model\ServicePriceHistory.class
+com\umar\service_offering\controller\ServiceOfferingAiController.class
 com\umar\service_offering\repository\ServiceOfferingRepository.class
 com\umar\service_offering\controller\ServiceOfferingController.class
+com\umar\service_offering\service\ServiceOfferingAiService.class
 com\umar\service_offering\audit\AuditorAwareImpl.class
 com\umar\service_offering\repository\ServicePriceHistoryRepository.class
 com\umar\service_offering\exchange\UserClient.class
@@ -14,6 +17,7 @@ com\umar\service_offering\ServiceOfferingApplication.class
 com\umar\service_offering\model\ServicePriceHistory$ServicePriceHistoryBuilder.class
 com\umar\service_offering\config\ExceptionConfig.class
 com\umar\service_offering\service\ServiceOfferingService.class
+com\umar\service_offering\serviceinterface\IServiceOfferingAiService.class
 com\umar\service_offering\event\ServiceOfferingEventProducer.class
 com\umar\service_offering\config\ServiceValidationConfig.class
 com\umar\service_offering\mapper\ServiceMapper.class

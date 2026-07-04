@@ -2,14 +2,18 @@ package com.umar.service_offering.service;
 
 import com.umar.events.services.*;
 import com.umar.exceptions.common.exception.ApiException;
+import com.umar.payload.enums.services.GenderType;
+import com.umar.payload.enums.services.ServiceType;
 import com.umar.payload.request.services.*;
 import com.umar.payload.request.user.UserValidateResponse;
 import com.umar.payload.response.category.CategoryResponse;
+import com.umar.payload.response.salon.SalonResponseV1;
 import com.umar.payload.response.services.BulkUpdateServiceResponse;
 import com.umar.payload.response.services.SearchServiceResponseList;
 import com.umar.payload.response.services.ServiceResponse;
 import com.umar.service_offering.event.ServiceOfferingEventProducer;
 import com.umar.service_offering.exchange.CategoryClient;
+import com.umar.service_offering.exchange.SalonClient;
 import com.umar.service_offering.exchange.UserClient;
 import com.umar.service_offering.mapper.ServiceMapper;
 import com.umar.service_offering.model.ServiceOffering;
@@ -28,6 +32,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,11 +50,16 @@ public class ServiceOfferingService implements IServiceOfferingService {
     private final ServiceOfferingEventProducer eventProducer;
     private final UserClient userClient;
     private final Executor executor;
+    private final SalonClient salonClient;
 
     @Override
     public ServiceResponse createServiceOffering(CreateServiceRequest request) {
         UserValidateResponse response = this.userClient.getUserValidation();
-        CategoryResponse categoryResponse =categoryClient.getCategoryById(request.getCategoryId());
+        SalonResponseV1 salonResponse = this.salonClient.getSalonById(request.getSalonId());
+        if(!response.getUserId().equals(salonResponse.getOwnerId())){
+            throw new ApiException(HttpStatus.UNAUTHORIZED,"UNAUTHORIZED","service.unauthorized");
+        }
+        CategoryResponse categoryResponse = categoryClient.getCategoryById(request.getCategoryId());
         if(!categoryResponse.getIsActive()){
             throw new ApiException(HttpStatus.NOT_ACCEPTABLE,"CATEGORY_INACTIVE","category.inActive");
         }
@@ -58,19 +68,15 @@ public class ServiceOfferingService implements IServiceOfferingService {
         }
         if(request.getAvailableFromTime() !=null && request.getAvailableToTime()!=null && request.getAvailableFromTime().isAfter(request.getAvailableToTime())){
             throw new ApiException(HttpStatus.BAD_REQUEST,"TIME_INCONSISTENT","service.timeInconsistent");
-
         }
-        ServiceOffering serviceOffering =ServiceOffering.builder()
-                .serviceType(null)
-                .bufferAfterMinutes(0)
-                .bufferBeforeMinutes(0)
-                .isActive(Boolean.TRUE)
-                .requiredDeposit(request.getRequiresDeposit())
-                .depositAmount(request.getDepositAmount())
-                .name(request.getName())
-                .description(request.getDescription())
-                .categoryId(request.getCategoryId())
-                .build();
+        ServiceOffering serviceOffering = serviceMapper.toEntity(request);
+        serviceOffering.setDeleted(Boolean.FALSE);
+        serviceOffering.setIsActive(Boolean.TRUE);
+        serviceOffering.setServiceType(ServiceType.SPA);
+        serviceOffering.setGenderType(GenderType.KIDS);
+        serviceOffering.setIsFeatured(Boolean.FALSE);
+        serviceOffering.setCancellationAllowed(Boolean.TRUE);
+        serviceOffering.setSlug(request.getName().toLowerCase().replace(" ","_"));
         ServiceOffering savedServiceOffering = repository.save(serviceOffering);
         ServicePriceHistory servicePriceHistory = ServicePriceHistory.builder()
                 .serviceId(savedServiceOffering.getId())
@@ -106,10 +112,10 @@ public class ServiceOfferingService implements IServiceOfferingService {
     @Override
     public ServiceResponse updateService(Long id, UpdateServiceRequest request) {
         ServiceOffering serviceOffering = this.repository.findById(id).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"SERVICE_NOT_FOUND","service.notFound"));
+        CategoryResponse categoryResponse = categoryClient.getCategoryById(request.getCategoryId());
         if(request.getRequiresDeposit() && (request.getDepositAmount()==null || request.getDepositAmount().equals(BigDecimal.ZERO))){
             throw new ApiException(HttpStatus.BAD_REQUEST,"DEPOSIT_INCONSISTENT","service.depositInconsistent");
         }
-        CategoryResponse categoryResponse = categoryClient.getCategoryById(request.getCategoryId());
         if(!categoryResponse.getIsActive()){
             throw new ApiException(HttpStatus.NOT_ACCEPTABLE,"CATEGORY_INACTIVE","category.inActive");
         }
@@ -120,7 +126,6 @@ public class ServiceOfferingService implements IServiceOfferingService {
         if(request.getPrice()!=null && !request.getPrice().equals(serviceOffering.getPrice())){
             ServicePriceHistory priceHistory = ServicePriceHistory.builder()
                     .changedAt(LocalDateTime.now())
-                    .changedBy(null)
                     .newPrice(request.getPrice())
                     .oldPrice(serviceOffering.getPrice())
                     .serviceId(id)
@@ -145,7 +150,8 @@ public class ServiceOfferingService implements IServiceOfferingService {
         if(!serviceOffering.getIsActive()){
             throw new ApiException(HttpStatus.BAD_REQUEST,"ALREADY_INACTIVE","service.alreadyInactive");
         }
-        serviceOffering.setIsActive(false);
+        serviceOffering.setIsActive(Boolean.FALSE);
+        serviceOffering.setDeleted(Boolean.TRUE);
         repository.save(serviceOffering);
         executor.execute(()->{
             DeleteServiceEvent deleteServiceEvent = DeleteServiceEvent.builder()
@@ -158,6 +164,7 @@ public class ServiceOfferingService implements IServiceOfferingService {
 
     @Override
     public BulkUpdateServiceResponse bulkUpdateService(BulkUpdateServiceRequest serviceRequest) {
+        BulkUpdateServiceResponse bulkUpdateServiceResponse = new BulkUpdateServiceResponse();
         Map<String, String> errorMap = new HashMap<>();
         UserValidateResponse response = userClient.getUserValidation();;
         if(serviceRequest.getUpdates().size()>50){
@@ -171,11 +178,13 @@ public class ServiceOfferingService implements IServiceOfferingService {
             ServiceOffering offering = serviceMap.get(serviceUpdateItem.getServiceId());
             if(offering==null){
                 errorMap.put("id_" + serviceUpdateItem.getServiceId(), "Service not found");
-            } else if (offering.getIsActive().equals(currentUserId)) {
+            } else if (!offering.getSalonId().equals(currentUserId)) {
                 errorMap.put("id_" + offering.getId(), "Not authorized to update this service");
             }
             if(!errorMap.isEmpty()){
-                throw new BatchValidationException(errorMap);
+                bulkUpdateServiceResponse.setFailedCount((long) errorMap.size());
+                bulkUpdateServiceResponse.setFiledIds(errorMap.keySet().stream().map(id->id.replace("id_", "")).map(Long::parseLong).toList());
+                bulkUpdateServiceResponse.setMessage(errorMap);
             }
         }
         List<ServiceOffering> serviceOfferingList =repository.saveAll(serviceMap.values());
@@ -208,6 +217,15 @@ public class ServiceOfferingService implements IServiceOfferingService {
                 .description(cloneServiceRequest.getDescription())
                 .price(cloneServiceRequest.getPrice())
                 .isFeatured(cloneServiceRequest.getIsFeatured())
+                .deleted(Boolean.FALSE)
+                .serviceType(serviceOffering.getServiceType())
+                .isActive(Boolean.TRUE)
+                .isFeatured(Boolean.FALSE)
+                .cancellationAllowed(serviceOffering.getCancellationAllowed())
+                .availableFromTime(serviceOffering.getAvailableFromTime())
+                .availableToTime(serviceOffering.getAvailableToTime())
+                .clonedFromId(serviceOffering.getId())
+                .slug(cloneServiceRequest.getName().replace(" ", "-"))
                 .durationMinutes(cloneServiceRequest.getDurationMinutes())
                 .build();
         ServiceOffering persistedService = repository.save(newClonedService);
@@ -233,8 +251,31 @@ public class ServiceOfferingService implements IServiceOfferingService {
         Pageable pageable = PageRequest.of(request.getPage(), request.getSize());
         List<ServiceOffering> serviceOfferingList = this.repository.searchServices(request.getQuery(), request.getSalonId(),
                 request.getCategoryId(), request.getMinPrice(), request.getMaxPrice(), request.getMaxDuration(), pageable);
+        if(serviceOfferingList.isEmpty()){
+            throw new ApiException(HttpStatus.NOT_FOUND,"NO_SERVICE_FOUND","No service found with given query");
+        }
+        SalonResponseV1 responseV1 = salonClient.getSalonById(request.getSalonId());
         SearchServiceResponseList responseList = new SearchServiceResponseList();
-        responseList.setResponseList(serviceOfferingList.stream().map(serviceMapper::toSearchResponse).toList());
+        responseList.setTotalPages((int) pageable.getOffset());
+        responseList.setSalonName(responseV1.getName());
+        responseList.setTotalResult(serviceOfferingList.size());
+        responseList.setSalonId(request.getSalonId());
+        responseList.setMinPrice(request.getMinPrice());
+        responseList.setMaxPrice(request.getMaxPrice());
+        responseList.setCategoryId(request.getCategoryId());
+        responseList.setDurationMinutes(request.getMaxDuration());
+        if (!serviceOfferingList.isEmpty()) {
+            double avgPrice = serviceOfferingList.stream()
+                    .mapToDouble(service -> service.getPrice() != null ? service.getPrice().doubleValue() : 0.0)
+                    .average()
+                    .orElse(0.0);
+            responseList.setAveragePrice(BigDecimal.valueOf(avgPrice));
+        }
+        List<SearchServiceResponseList.SearchServiceResponse> mutableList = new ArrayList<>(responseList.getResponseList());
+        for(ServiceOffering serviceOffering : serviceOfferingList){
+            mutableList.add(serviceMapper.toSearchResponse(serviceOffering));
+        }
+        responseList.setResponseList(mutableList);
         return responseList;
     }
 

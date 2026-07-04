@@ -31,6 +31,9 @@ public class CreateServiceRequest {
     @Pattern(regexp = "^[A-Z]{3}$", message = "Currency should be a valid ISO 4217 code")
     private String currency;
 
+    @NotNull(message = "Salon ID is required")
+    private Long salonId;
+
     @Size(max = 1000, message = "Description must be at most 1000 characters")
     private String description;
 

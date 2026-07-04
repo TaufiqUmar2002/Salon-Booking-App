@@ -1,5 +1,6 @@
 package com.umar.service_offering.mapper;
 
+import com.umar.payload.request.services.CreateServiceRequest;
 import com.umar.payload.request.services.UpdateServiceRequest;
 import com.umar.payload.response.services.SearchServiceResponseList;
 import com.umar.payload.response.services.ServiceResponse;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-29T08:11:47+0530",
+    date = "2026-07-04T20:51:46+0530",
     comments = "version: 1.6.3, compiler: javac, environment: Java 23 (Oracle Corporation)"
 )
 @Component
@@ -35,6 +36,39 @@ public class ServiceMapperImpl implements ServiceMapper {
         serviceResponse.imageUrl( serviceOffering.getImageUrl() );
 
         return serviceResponse.build();
+    }
+
+    @Override
+    public ServiceOffering toEntity(CreateServiceRequest serviceRequest) {
+        if ( serviceRequest == null ) {
+            return null;
+        }
+
+        ServiceOffering.ServiceOfferingBuilder serviceOffering = ServiceOffering.builder();
+
+        serviceOffering.salonId( serviceRequest.getSalonId() );
+        serviceOffering.categoryId( serviceRequest.getCategoryId() );
+        serviceOffering.name( serviceRequest.getName() );
+        serviceOffering.description( serviceRequest.getDescription() );
+        serviceOffering.durationMinutes( serviceRequest.getDurationMinutes() );
+        serviceOffering.price( serviceRequest.getPrice() );
+        serviceOffering.discountedPrice( serviceRequest.getDiscountedPrice() );
+        serviceOffering.currency( serviceRequest.getCurrency() );
+        serviceOffering.maxCapacity( serviceRequest.getMaxCapacity() );
+        List<Long> list = serviceRequest.getStaffIds();
+        if ( list != null ) {
+            serviceOffering.staffIds( new ArrayList<Long>( list ) );
+        }
+        serviceOffering.depositAmount( serviceRequest.getDepositAmount() );
+        serviceOffering.isFeatured( serviceRequest.getIsFeatured() );
+        List<String> list1 = serviceRequest.getTags();
+        if ( list1 != null ) {
+            serviceOffering.tags( new ArrayList<String>( list1 ) );
+        }
+        serviceOffering.availableFromTime( serviceRequest.getAvailableFromTime() );
+        serviceOffering.availableToTime( serviceRequest.getAvailableToTime() );
+
+        return serviceOffering.build();
     }
 
     @Override
@@ -96,6 +130,12 @@ public class ServiceMapperImpl implements ServiceMapper {
                 serviceOffering.setTags( new ArrayList<String>( list1 ) );
             }
         }
+        if ( request.getAvailableFromTime() != null ) {
+            serviceOffering.setAvailableFromTime( request.getAvailableFromTime() );
+        }
+        if ( request.getAvailableToTime() != null ) {
+            serviceOffering.setAvailableToTime( request.getAvailableToTime() );
+        }
     }
 
     @Override
@@ -105,6 +145,9 @@ public class ServiceMapperImpl implements ServiceMapper {
         }
 
         SearchServiceResponseList.SearchServiceResponse.SearchServiceResponseBuilder searchServiceResponse = SearchServiceResponseList.SearchServiceResponse.builder();
+
+        searchServiceResponse.serviceId( serviceOffering.getId() );
+        searchServiceResponse.serviceName( serviceOffering.getName() );
 
         return searchServiceResponse.build();
     }

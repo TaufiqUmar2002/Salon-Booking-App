@@ -16,6 +16,7 @@ import java.util.Map;
 public class SalonResponseV1 {
     private Long salonId;
     private String name;
+    private Long ownerId;
     private String description;
     private Long category;
     private String address;

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -17,5 +18,9 @@ public class BulkUpdateServiceResponse {
 
     private List<Long> updatedIds;
 
-    private String message;
+    private List<Long> filedIds;
+
+    private Long failedCount;
+
+    private Map<String,String> message;
 }

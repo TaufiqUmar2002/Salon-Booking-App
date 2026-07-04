@@ -1,8 +1,8 @@
 package com.umar.service_offering.model;
 
 
-import com.umar.payload.constants.GenderType;
-import com.umar.payload.constants.ServiceType;
+import com.umar.payload.enums.services.GenderType;
+import com.umar.payload.enums.services.ServiceType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -12,6 +12,7 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -125,24 +126,22 @@ public class ServiceOffering  {
     private Integer totalReviews = 0;
 
     @CreatedBy
-    @Column(name = "created_by", nullable = false)
-    private Long createdBy;
+    @Column(name = "created_by")
+    private String createdBy;
 
     @LastModifiedBy
     @Column(name = "updated_by")
-    private Long updatedBy;
+    private String updatedBy;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-
-
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(nullable = false)
+    @Column()
     private Boolean deleted = false;
 
     @Version
@@ -152,7 +151,9 @@ public class ServiceOffering  {
 
     private Integer bookingCount;
 
-
     private String image;
+
+    private LocalTime availableFromTime;
+    private LocalTime availableToTime;
 
 }
