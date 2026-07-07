@@ -40,8 +40,12 @@ public class Booking {
     private LocalDateTime noShowTime;
     private BigDecimal totalPrice;
     private String currency;
+    private Long customerId;
     private String customerNotes;
     private Long kafkaOffset;
+    private Boolean cancellationFeeApplied;
+    private BigDecimal cancellationFee;
+    private Integer rescheduleCount;
 
     @CreatedDate
     private LocalDateTime createdAt;
@@ -51,6 +55,8 @@ public class Booking {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    private Long totalServices;
 
     @LastModifiedBy
     private String updatedBy;

@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Import;
 
 @Import(GlobalException.class)
 @Configuration
-public class ExceptionConfig {
+public class BookingExceptionConfig {
     @Bean
     public GlobalException bookingException(MessageSource messageSource){
         return new GlobalException(messageSource);

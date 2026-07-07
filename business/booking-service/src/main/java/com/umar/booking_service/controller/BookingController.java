@@ -2,14 +2,11 @@ package com.umar.booking_service.controller;
 
 import com.umar.booking_service.serviceinterface.IBookingService;
 import com.umar.payload.request.booking.*;
-import com.umar.payload.response.booking.BookingAvailabilityResponse;
-import com.umar.payload.response.booking.BookingResponse;
-import com.umar.payload.response.booking.BookingResponseV1;
-import com.umar.payload.response.booking.UserBookingResponse;
-import jakarta.ws.rs.Path;
+import com.umar.payload.response.booking.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/api/booking")
@@ -19,6 +16,7 @@ public class BookingController {
 
     private final IBookingService bookingService;
 
+    @PreAuthorize("hasRole('CUSTOMER')")
     @PostMapping
     public ResponseEntity<BookingResponse> createBooking(@RequestBody BookingRequest request){
         BookingResponse booking =bookingService.createBooking(request);
@@ -80,8 +78,8 @@ public class BookingController {
     }
 
     @GetMapping("/salon/{salonId}/summary")
-    public ResponseEntity<BookingResponse> salonSummary(@PathVariable Long salonId){
-        BookingResponse Response = this.bookingService.salonSummary(salonId);
+    public ResponseEntity<BookingSummaryResponse> salonSummary(@PathVariable Long salonId){
+        BookingSummaryResponse Response = this.bookingService.salonSummary(salonId);
         return ResponseEntity.ok(Response);
     }
 

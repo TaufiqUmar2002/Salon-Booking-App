@@ -1,10 +1,7 @@
 package com.umar.booking_service.serviceinterface;
 
 import com.umar.payload.request.booking.*;
-import com.umar.payload.response.booking.BookingAvailabilityResponse;
-import com.umar.payload.response.booking.BookingResponse;
-import com.umar.payload.response.booking.BookingResponseV1;
-import com.umar.payload.response.booking.UserBookingResponse;
+import com.umar.payload.response.booking.*;
 
 public interface IBookingService {
 
@@ -17,7 +14,7 @@ public interface IBookingService {
     BookingResponse rescheduleBooking(Long id, RescheduleBookingRequest request);
     BookingResponse completeBooking(Long id);
     BookingResponse noShowBooking(Long id);
-    BookingResponse salonSummary(Long salonId);
+    BookingSummaryResponse salonSummary(Long salonId);
     UserBookingResponse getBookingByCategory(Long categoryId);
 
 }
