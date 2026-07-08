@@ -192,8 +192,14 @@ public class BookingService implements IBookingService {
 
     @Override
     public UserBookingResponse getBookingBySalonId(Long id, SalonBookingParamRequest request) {
-        Booking booking = this.bookingRepository.findById(id).orElseThrow(()->new ApiException(HttpStatus.NOT_FOUND,"BOOKING_NOT_FOUND","booking.notFound"));
-        return null;
+        List<Booking> booking = this.bookingRepository.getBookingBySalonId(id);
+        if(booking.isEmpty()){
+           throw new ApiException(HttpStatus.NOT_FOUND,"NOT_FOUND","booking.notFound");
+        }
+        return UserBookingResponse.builder()
+                .totalElements(Long.valueOf(booking.size()))
+                .summary(booking.stream().map(bookingMapper::toUserBookingResponse).toList())
+                .build();
     }
 
     @Override
