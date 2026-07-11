@@ -1,15 +1,18 @@
-package com.umar.payment_service.config;
+package com.umar.config;
 
 import com.umar.exceptions.user.exceptionController.GlobalException;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+
 @Import(GlobalException.class)
 @Configuration
-public class ExceptionConfig {
+public class AiExceptionConfig {
     @Bean
-    public GlobalException bookingException(){
-        return new GlobalException();
+    public GlobalException bookingException(MessageSource messageSource){
+        return new GlobalException(messageSource);
     }
+
 }
