@@ -1,0 +1,4 @@
+com\umar\controller\AiRecommendationController.class
+com\umar\serviceinterface\IAiRecommendationService.class
+com\umar\service\AiRecommendationService.class
+com\umar\AIRecommendServiceApplication.class
