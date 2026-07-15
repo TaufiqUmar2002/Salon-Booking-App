@@ -5,11 +5,7 @@ import com.umar.exceptions.common.exception.ApiException;
 import com.umar.exceptions.common.request.ApiError;
 import com.umar.exceptions.common.response.ValidationErrorResponse;
 import com.umar.exceptions.user.exception.ResourceAlreadyExistsException;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +13,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
@@ -34,6 +29,15 @@ public class GlobalException {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", exception.getLocalizedMessage()));
     }
 
+    @ExceptionHandler(ClassCastException.class)
+    public ResponseEntity<Map<String, String>> handleClassCastException(ClassCastException exception) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", exception.getLocalizedMessage()));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, String>> handleException(Exception exception) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", exception.getLocalizedMessage()));
+    }
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleValidationException(
             MethodArgumentNotValidException ex
