@@ -20,10 +20,8 @@ import user_service.model.UserPreference;
 import user_service.repository.UserPreferenceRepository;
 import user_service.repository.UserRepository;
 import user_service.serviceInterface.IUserAiService;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 
 @Slf4j

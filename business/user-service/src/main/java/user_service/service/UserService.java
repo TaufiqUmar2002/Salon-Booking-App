@@ -64,6 +64,9 @@ public class UserService implements IUserService {
         UserRegisteredEvent registeredEvent=null;
         List<String> updatedFields = new ArrayList<>();
         User user = this.validateUserExists(userId, null);
+        if(!user.getIsActive()){
+            throw new ApiException(HttpStatus.FORBIDDEN,"USER_NOT_ACTIVE","user.notActive");
+        }
         if(request.getEmail()!=null && !request.getEmail().equals(user.getEmail())){
             user.setIsEmailVerified(false);
             updateField(request.getEmail(),user.getEmail(),user::setEmail,"email",updatedFields);
@@ -101,6 +104,9 @@ public class UserService implements IUserService {
     @Override
     public void updateProfilePhoto(Long userId, MultipartFile file) {
         User user =validateUserExists(userId,null);
+        if(!user.getIsActive()){
+            throw new ApiException(HttpStatus.FORBIDDEN,"USER_NOT_ACTIVE","user.notActive");
+        }
         this.validateImage(file);
         String imageUrl = fileStorageService.upload(file);
         user.setProfilePhotoUrl(imageUrl);
@@ -113,6 +119,9 @@ public class UserService implements IUserService {
         User user = this.validateUserExists(id,null);
         if(request==null){
             throw new ApiException(HttpStatus.BAD_REQUEST,"NO_FIELDS_PROVIDED","user.updateUserNotification");
+        }
+        if(!user.getIsActive()){
+            throw new ApiException(HttpStatus.FORBIDDEN,"USER_NOT_ACTIVE","user.notActive");
         }
         updateField(request.getNotifyEmail(),user.getNotifyEmail(),user::setNotifyEmail,"notifyEmail",null);
         updateField(request.getNotifyPush(),user.getNotifyPush(),user::setNotifyPush,"notifyPush",null);

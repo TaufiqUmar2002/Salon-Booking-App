@@ -25,7 +25,7 @@ import java.util.Set;
 public class JwtUtil {
 
     private SecretKey key;
-    private long accessTokenExpiration=900000;
+    private long accessTokenExpiration=9000000;
     private long refreshTokenExpiration=604800000;
     private final PasswordEncoder passwordEncoder;
 

@@ -32,9 +32,7 @@ import user_service.util.JwtUtil;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -139,8 +137,7 @@ public class AuthService implements IAuthService {
         }
         String jwtAccessToken  = jwtProvider.generateAccessToken(user);
         String jwtRefreshToken = jwtProvider.generateRefreshToken(user);
-        user.setRefreshToken(passwordEncoder.encode(jwtRefreshToken));
-        user.setUpdatedAt(LocalDateTime.now());
+        user.setRefreshToken(jwtRefreshToken);
         userRepository.save(user);
         return RefreshTokenResponse.builder()
                 .accessToken(jwtAccessToken)
@@ -163,6 +160,9 @@ public class AuthService implements IAuthService {
             throw new ApiException(HttpStatus.UNAUTHORIZED,"INVALID_CREDENTIALS","forgotEmail.error.invalidCredentials");
         }
         User user =optionalUser.get();
+        if(!user.getIsActive()){
+            throw new ApiException(HttpStatus.FORBIDDEN,"USER_NOT_ACTIVE","user.notActive");
+        }
         VerificationToken passwordResetToken = verificationService.createToken(user);
         user.setPasswordResetToken(passwordResetToken.getToken());
         userRepository.save(user);

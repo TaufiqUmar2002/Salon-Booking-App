@@ -1,15 +1,15 @@
 package user_service.mapper;
 
+import com.umar.payload.enums.user.UserRole;
 import com.umar.payload.request.user.AuthRequest;
 import com.umar.payload.request.user.UserProfileResponse;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
-import user_service.constants.UserRole;
 import user_service.model.User;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-28T17:17:14+0530",
+    date = "2026-07-11T18:29:34+0530",
     comments = "version: 1.6.3, compiler: javac, environment: Java 23 (Oracle Corporation)"
 )
 @Component
@@ -80,7 +80,29 @@ public class UserMapperImpl implements UserMapper {
         return userProfileResponse.build();
     }
 
-    protected UserRole userRoleToUserRole(com.umar.payload.constants.UserRole userRole) {
+    protected user_service.constants.UserRole userRoleToUserRole(UserRole userRole) {
+        if ( userRole == null ) {
+            return null;
+        }
+
+        user_service.constants.UserRole userRole1;
+
+        switch ( userRole ) {
+            case CUSTOMER: userRole1 = user_service.constants.UserRole.CUSTOMER;
+            break;
+            case SALON_OWNER: userRole1 = user_service.constants.UserRole.SALON_OWNER;
+            break;
+            case STAFF: userRole1 = user_service.constants.UserRole.STAFF;
+            break;
+            case ADMIN: userRole1 = user_service.constants.UserRole.ADMIN;
+            break;
+            default: throw new IllegalArgumentException( "Unexpected enum constant: " + userRole );
+        }
+
+        return userRole1;
+    }
+
+    protected UserRole userRoleToUserRole1(user_service.constants.UserRole userRole) {
         if ( userRole == null ) {
             return null;
         }
@@ -95,28 +117,6 @@ public class UserMapperImpl implements UserMapper {
             case STAFF: userRole1 = UserRole.STAFF;
             break;
             case ADMIN: userRole1 = UserRole.ADMIN;
-            break;
-            default: throw new IllegalArgumentException( "Unexpected enum constant: " + userRole );
-        }
-
-        return userRole1;
-    }
-
-    protected com.umar.payload.constants.UserRole userRoleToUserRole1(UserRole userRole) {
-        if ( userRole == null ) {
-            return null;
-        }
-
-        com.umar.payload.constants.UserRole userRole1;
-
-        switch ( userRole ) {
-            case CUSTOMER: userRole1 = com.umar.payload.constants.UserRole.CUSTOMER;
-            break;
-            case SALON_OWNER: userRole1 = com.umar.payload.constants.UserRole.SALON_OWNER;
-            break;
-            case STAFF: userRole1 = com.umar.payload.constants.UserRole.STAFF;
-            break;
-            case ADMIN: userRole1 = com.umar.payload.constants.UserRole.ADMIN;
             break;
             default: throw new IllegalArgumentException( "Unexpected enum constant: " + userRole );
         }
