@@ -17,21 +17,26 @@ public class PaymentController {
 
     @PostMapping("/initiate")
     public ResponseEntity<PaymentInitiationResponse> initiatePayment(@Valid @RequestBody PaymentInitiationRequest request){
-        return null;
+        PaymentInitiationResponse paymentInitiationResponse = this.paymentService.initiatePayment(request);
+        return ResponseEntity.ok(paymentInitiationResponse);
     }
 
     @PostMapping("/confirm")
-    public ResponseEntity<Void> confirmPayment(){
+    public ResponseEntity<Void> confirmPayment(@RequestBody String payload,
+                                               @RequestHeader("X-Razorpay-Signature") String signature){
+        paymentService.confirmPayment(payload,signature);
         return null;
     }
 
     @PostMapping("/refund/{bookingId}")
     public ResponseEntity<Void> bookPayment(@PathVariable Long bookingId){
+        paymentService.refundPayment(bookingId);
         return null;
     }
 
     @GetMapping("/history/{userId}")
     public ResponseEntity<Void> getPaymentHistoryByUser(@PathVariable Long userId){
+        paymentService.getPaymentHistoryByUser(userId);
         return null;
     }
 

@@ -1,13 +1,17 @@
 package com.umar.payment_service.model;
 
-import com.umar.payload.constants.PaymentMethod;
-import com.umar.payload.constants.PaymentStatus;
+import com.umar.payload.enums.payment.PaymentMethod;
+import com.umar.payload.enums.payment.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,6 +22,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "PAYMENT_RECORD")
+@EntityListeners(AuditingEntityListener.class)
 public class PaymentRecord {
 
     @Id
@@ -49,7 +54,18 @@ public class PaymentRecord {
     private String receiptUrl;
     @ElementCollection
     private List<String> metadata;
+
+    @CreationTimestamp
     private LocalDateTime createdAt;
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    @Version
+    private Long version;
+
+    @CreatedBy
+    private String createdBy;
+
+    @LastModifiedBy
+    private String updatedBy;
 }

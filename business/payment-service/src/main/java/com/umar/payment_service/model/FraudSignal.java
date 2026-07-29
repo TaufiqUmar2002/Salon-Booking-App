@@ -1,14 +1,13 @@
 package com.umar.payment_service.model;
 
-import com.umar.payload.constants.Decision;
-import com.umar.payload.constants.ReviewOutcome;
-import com.umar.payload.constants.SignalType;
+import com.umar.payload.enums.payment.Decision;
+import com.umar.payload.enums.review.ReviewOutcome;
+import com.umar.payload.enums.payment.SignalType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
 
 @Data
