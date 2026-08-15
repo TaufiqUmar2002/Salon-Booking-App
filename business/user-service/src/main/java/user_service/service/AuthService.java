@@ -103,7 +103,7 @@ public class AuthService implements IAuthService {
         }
         clearFailedAttempts(ipAddress);
         String jwtRefreshToken = user.getRefreshToken();
-        if(jwtRefreshToken==null || jwtProvider.isTokenExpired(jwtRefreshToken)){
+        if(jwtRefreshToken==null || jwtProvider.isRefreshTokenExpired(jwtRefreshToken)){
             jwtRefreshToken=jwtProvider.generateRefreshToken(user);
         }
         String jwtAccessToken = jwtProvider.generateAccessToken(user);

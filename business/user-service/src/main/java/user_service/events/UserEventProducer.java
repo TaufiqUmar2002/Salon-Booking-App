@@ -19,21 +19,21 @@ public class UserEventProducer {
 
     public void publishPasswordResetEvent(PasswordResetRequestedEvent event) {
         log.info("user password reset event publish {} ",event);
-        kafkaTemplate.send("salon.user.password.reset", event);
+        kafkaTemplate.send("salon.user.password.reset",event.getUserId(), event);
     }
     public void publishUserRegisteredEvent(UserRegisteredEvent event){
         log.info("user registered event publish {} ",event);
-        kafkaTemplate.send("salon.user.registered",event);
+        kafkaTemplate.send("salon.user.registered",event.getUserId().toString(),event);
     }
 
     public void publishUserProfileUpdateEvent(UserProfileUpdatedEvent event){
         log.info("user profile updated {}",event);
-        kafkaTemplate.send("salon.user.profile.updated",event);
+        kafkaTemplate.send("salon.user.profile.updated",event.getUserId().toString(),event);
     }
 
     public void publishUserInactiveEvent(UserInactiveEvent event){
         log.info("publishUserInactiveEvent {}",event);
-        kafkaTemplate.send("salon.user.profile.inactive",event);
+        kafkaTemplate.send("salon.user.profile.inactive",event.getUserId().toString(),event);
     }
 
 }

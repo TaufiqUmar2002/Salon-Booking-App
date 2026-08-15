@@ -93,6 +93,15 @@ public class JwtUtil {
         return expiration.before(new Date());
     }
 
+    public boolean isRefreshTokenExpired(String token) {
+        try{
+            return this.isTokenExpired(token);
+        }
+        catch (ApiException exception){
+            return false;
+        }
+    }
+
     public String getAccessTokenExpiry(String token){
         Date expiration = extractClaims(token).getExpiration();
         return expiration.toString();
