@@ -1,4 +1,4 @@
-server.port: 6009
+server.port: 6019
 
 spring:
   application:
@@ -25,7 +25,7 @@ spring:
 
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.OracleDialect
+        dialect: org.hibernate.dialect.MySQLDialect
 
 eureka:
   instance:
@@ -40,6 +40,8 @@ eureka:
 logging:
   level:
     org.springframework.cache: TRACE
+    org.springframework.kafka: TRACE
+    org.apache.kafka.clients.consumer: info
 
 
 

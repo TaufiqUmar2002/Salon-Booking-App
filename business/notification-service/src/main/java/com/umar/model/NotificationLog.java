@@ -8,6 +8,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -17,6 +20,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 @Data
+@EntityListeners(AuditingEntityListener.class)
 public class NotificationLog {
 
     @Id
@@ -42,6 +46,10 @@ public class NotificationLog {
     private Boolean sendTimeOptimised;
     private LocalDateTime scheduledFor;
     private LocalDateTime deliveredAt;
+
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @CreatedBy
+    public String createdBy;
 }
