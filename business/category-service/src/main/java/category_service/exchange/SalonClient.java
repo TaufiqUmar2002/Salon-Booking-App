@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(name = "SALON-SERVICE",url = "http://localhost:5009")
 public interface SalonClient {
 
-    @GetMapping("/salon/{categoryId}")
+    @GetMapping("api//salon/category/{categoryId}")
     SalonResponseList getSalonByCategory(@PathVariable("categoryId") Long id);
 }

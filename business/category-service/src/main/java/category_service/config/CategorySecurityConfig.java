@@ -1,12 +1,9 @@
 package category_service.config;
 
 import com.umar.config.BasicSecurityConfig;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
 
-@Component
-@EnableWebSecurity
+@Configuration
 public class CategorySecurityConfig extends BasicSecurityConfig{
-
 }

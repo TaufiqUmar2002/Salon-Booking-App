@@ -18,26 +18,26 @@ public class CategoryEventProducer {
 
     public void publishCategoryCreationEvent(CreateCategoryEventRequest eventRequest){
         log.info("[CategoryEventProducer][publishCategoryCreationEvent] {}" ,eventRequest);
-        kafkaTemplate.send("salon.category.events",eventRequest.getCategoryId().toString(),eventRequest);
+        kafkaTemplate.send("salon.category.create",eventRequest.getCategoryId().toString(),eventRequest);
     }
 
     public void publishCategoryUpdateEvent(UpdateCategoryEventRequest eventRequest){
         log.info("[CategoryEventProducer][publishCategoryUpdateEvent] {}" ,eventRequest);
-        kafkaTemplate.send("salon.category.events",eventRequest.getCategoryId().toString(),eventRequest);
+        kafkaTemplate.send("salon.category.update",eventRequest.getCategoryId().toString(),eventRequest);
     }
 
     public void publishCategoryDeleteEvent(UpdateCategoryEventRequest request){
         log.info("[CategoryEventProducer][publishCategoryDeleteEvent] {}" ,request.getCategoryId());
-        kafkaTemplate.send("salon.category.events",request.getCategoryId().toString(),request);
+        kafkaTemplate.send("salon.category.delete",request.getCategoryId().toString(),request);
     }
 
     public void publishCategoryRestoreEvent(CreateCategoryEventRequest request){
         log.info("[CategoryEventProducer][publishCategoryRestoreEvent] {}" ,request.getCategoryId());
-        kafkaTemplate.send("salon.category.events",request.getCategoryId().toString(),request);
+        kafkaTemplate.send("salon.category.restore",request.getCategoryId().toString(),request);
     }
 
     public void publishCategoryMergeEvent(CategoryMergeEvent mergeEvent){
         log.info("[CategoryEventProducer][publishCategoryMergeEvent] {}",mergeEvent.getSourceCategoryId());
-        kafkaTemplate.send("salon.category.events",mergeEvent);
+        kafkaTemplate.send("salon.category.merge",mergeEvent);
     }
 }

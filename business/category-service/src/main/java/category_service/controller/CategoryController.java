@@ -43,10 +43,11 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatus.OK).body( categoryService.getAllCategory(format,topLevelOnly,featuredOnly,includeCount));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SALON_OWNER')")
     @GetMapping("/{id}")
-    private ResponseEntity<CategoryResponse> getCategoryById(@PathVariable Long id){
-        return ResponseEntity.status(HttpStatus.OK).body(this.categoryService.getCategoryById(id));
+    public ResponseEntity<CategoryResponse> getCategoryById(@PathVariable("id") Long id){
+        CategoryResponse categoryResponse = this.categoryService.getCategoryById(id);
+        return ResponseEntity.status(HttpStatus.OK).body(categoryResponse);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
