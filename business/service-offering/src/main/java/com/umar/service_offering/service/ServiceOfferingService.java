@@ -98,7 +98,7 @@ public class ServiceOfferingService implements IServiceOfferingService {
 
     @Override
     public Page<ServiceResponse> getAllServicesBySalonId(Long salonId, ServiceSalonSearchRequest request) {
-        Pageable pageable = PageRequest.of(request.getPage(),request.getSize(), Sort.Direction.fromString(request.getSortBy()));
+        Pageable pageable = PageRequest.of(request.getPage(),request.getSize(), Sort.Direction.fromString(request.getSortBy()),request.getSortDir());
         Page<ServiceOffering> serviceOfferingPage = repository.searchServiceBySalonId(salonId,request.getCategoryId(),pageable);
         return serviceOfferingPage.map(serviceMapper::toResponse);
     }

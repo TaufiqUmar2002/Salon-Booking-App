@@ -1,4 +1,16 @@
-com\umar\serviceinterface\IEodBodService.class
+com\umar\model\EodBodConfig$EodBodConfigBuilder.class
 com\umar\EodBodApplication.class
 com\umar\controller\EodBodController.class
 com\umar\service\EodBodService.class
+com\umar\serviceinterface\IEodBodService.class
+com\umar\model\EodBodConfig.class
+com\umar\model\EodBodRun$EodBodRunBuilder.class
+com\umar\repository\EodBodRunStepRepository.class
+com\umar\config\EodSecurityConfig.class
+com\umar\model\EodBodRunStep.class
+com\umar\mapper\EodMapper.class
+com\umar\repository\EodBodConfigRepository.class
+com\umar\config\EodExceptionConfig.class
+com\umar\model\EodBodRun.class
+com\umar\model\EodBodRunStep$EodBodRunStepBuilder.class
+com\umar\repository\EodBodRunRepository.class

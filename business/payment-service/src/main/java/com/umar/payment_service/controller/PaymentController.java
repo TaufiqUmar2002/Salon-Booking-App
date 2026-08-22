@@ -22,10 +22,9 @@ public class PaymentController {
     }
 
     @PostMapping("/confirm")
-    public ResponseEntity<Void> confirmPayment(@RequestBody String payload,
-                                               @RequestHeader("X-Razorpay-Signature") String signature){
+    public ResponseEntity<Void> confirmPayment(@RequestBody String payload, @RequestHeader("X-Razorpay-Signature") String signature){
         paymentService.confirmPayment(payload,signature);
-        return null;
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/refund/{bookingId}")

@@ -4,6 +4,8 @@ D:\Backend\Projects\Microservices\Salon\Microservice\business\notification-servi
 D:\Backend\Projects\Microservices\Salon\Microservice\business\notification-service\src\main\java\com\umar\config\NotificationExceptionConfig.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\notification-service\src\main\java\com\umar\config\NotificationSecurityConfig.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\notification-service\src\main\java\com\umar\config\NotificationValidationConfig.java
+D:\Backend\Projects\Microservices\Salon\Microservice\business\notification-service\src\main\java\com\umar\dedupe\EventDeduplicationService.java
+D:\Backend\Projects\Microservices\Salon\Microservice\business\notification-service\src\main\java\com\umar\dedupe\IEventDeduplicationService.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\notification-service\src\main\java\com\umar\events\CategoryEventConsumer.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\notification-service\src\main\java\com\umar\events\UserEventConsumer.java
 D:\Backend\Projects\Microservices\Salon\Microservice\business\notification-service\src\main\java\com\umar\exchange\FeignJwtInterceptor.java

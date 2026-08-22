@@ -19,27 +19,27 @@ public class ServiceOfferingEventProducer {
 
     public void publishServiceCreatedEvent(ServiceCreatedEvent event){
         log.info("[ServiceOfferingEventProducer][publishServiceCreatedEvent]");
-        kafkaTemplate.send("service.created",event);
+        kafkaTemplate.send("salon.service.created",event);
     }
 
     public void publishServiceUpdateEvent(UpdateServiceEvent event){
         log.info("[ServiceOfferingEventProducer][publishServiceUpdateEvent]");
-        kafkaTemplate.send("service.updated",event);
+        kafkaTemplate.send("salon.service.updated",event);
     }
     public void publishServiceDeleteEvent(DeleteServiceEvent event){
         log.info("[ServiceOfferingEventProducer][publishServiceDeleteEvent]");
-        kafkaTemplate.send("service.deleted",event);
+        kafkaTemplate.send("salon.service.deleted",event);
     }
 
     public void publishBulkServiceUpdateEvent(BulkServiceUpdateEvent event){
         log.info("[ServiceOfferingEventProducer][publishBulkServiceUpdateEvent] {}",event);
-        kafkaTemplate.send("service.bulk.update",event);
+        kafkaTemplate.send("salon.service.bulk.update",event);
 
     }
 
     public void publishCloneServiceEvent(CloneServiceEvent serviceEvent){
         log.info("[ServiceOfferingEventProducer][publishCloneServiceEvent] {}",serviceEvent);
-        kafkaTemplate.send("service.clone",serviceEvent);
+        kafkaTemplate.send("salon.service.clone",serviceEvent);
 
 
     }

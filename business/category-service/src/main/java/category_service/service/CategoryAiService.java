@@ -45,7 +45,8 @@ public class CategoryAiService implements ICategoryAIService {
 
     @Override
     public Suggestions generateDescription(GenerateDescription description) {
-
-        return null;
+        Suggestions suggestions = new Suggestions();
+        suggestions.setSuggestionV1List(null);
+        return suggestions;
     }
 }

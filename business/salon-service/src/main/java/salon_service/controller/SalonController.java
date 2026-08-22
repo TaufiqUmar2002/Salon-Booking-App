@@ -47,6 +47,7 @@ public class SalonController {
         return ResponseEntity.status(HttpStatus.OK).body(responseV1);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SALON_OWNER')")
     @GetMapping("/category/{categoryId}")
     public ResponseEntity<SalonResponseList> getSalonByCategory(@PathVariable("categoryId") Long categoryId){
         SalonResponseList responseList = service.getSalonByCategory(categoryId);

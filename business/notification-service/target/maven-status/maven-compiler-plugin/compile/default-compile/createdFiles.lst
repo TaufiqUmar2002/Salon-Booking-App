@@ -7,6 +7,8 @@ com\umar\repository\UserNotificationPreferenceRepository.class
 com\umar\audit\AuditorAwareImpl.class
 com\umar\config\ExecutorConfig.class
 com\umar\config\NotificationExceptionConfig.class
+com\umar\dedupe\IEventDeduplicationService.class
+com\umar\dedupe\EventDeduplicationService.class
 com\umar\service\NotificationService.class
 com\umar\config\NotificationSecurityConfig.class
 com\umar\events\UserEventConsumer.class

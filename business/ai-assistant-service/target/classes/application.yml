@@ -8,11 +8,24 @@ spring:
   devtools:
     add-properties: true
 
+  ai:
+    openai:
+      api-key:  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
+      base-url: https://integrate.api.nvidia.com
+      chat:
+        options:
+          model: nvidia/llama-3.3-nemotron-super-49b-v1
+
   datasource:
-    url: jdbc:postgresql://postgres-db:5432/app_db
+    url: jdbc:postgresql://localhost:6001/app_db?options=-c%20TimeZone=UTC
     username: admin
     password: admin
     driver-class-name: org.postgresql.Driver
+#  datasource:
+#    url: jdbc:postgresql://postgres-db:5432/app_db
+#    username: admin
+#    password: admin
+#    driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
@@ -20,12 +33,32 @@ spring:
     show-sql: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://eureka-server:4001/eureka/
-    register-with-eureka: true
-    fetch-registry: true
 
+
+eureka:
   instance:
-    prefer-ip-address: true
+    prefer-ip-address : true
+  client:
+    fetch-registry : true
+    register-with-eureka : true
+    service-url:
+      defaultZone : http://localhost:4001/eureka/
+
+
+logging:
+  level:
+    org.springframework.cache: TRACE
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.models: DEBUG
+
+
+#
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: http://eureka-server:4001/eureka/
+#    register-with-eureka: true
+#    fetch-registry: true
+#
+#  instance:
+#    prefer-ip-address: true

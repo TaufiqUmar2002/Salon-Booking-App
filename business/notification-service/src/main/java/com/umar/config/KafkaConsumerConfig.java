@@ -23,34 +23,13 @@ public class KafkaConsumerConfig {
 
         @Bean
         public ConsumerFactory<String, Object> jsonConsumerFactory() {
-
             Map<String, Object> config = new HashMap<>();
-
-            config.put(
-                    ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                    "localhost:9092"
-            );
-
-            config.put(
-                    ConsumerConfig.AUTO_OFFSET_RESET_CONFIG,
-                    "earliest"
-            );
-
-            config.put(
-                    ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,
-                    true
-            );
-
-            JacksonJsonDeserializer<Object> deserializer =
-                    new JacksonJsonDeserializer<>(Object.class);
-
+            config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+            config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+            config.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
+            JacksonJsonDeserializer<Object> deserializer = new JacksonJsonDeserializer<>(Object.class);
             deserializer.addTrustedPackages("com.umar.events.*");
-
-            return new DefaultKafkaConsumerFactory<>(
-                    config,
-                    new StringDeserializer(),
-                    deserializer
-            );
+            return new DefaultKafkaConsumerFactory<>(config, new StringDeserializer(), deserializer);
         }
 
         @Bean

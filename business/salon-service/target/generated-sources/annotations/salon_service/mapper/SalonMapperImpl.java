@@ -15,7 +15,7 @@ import salon_service.model.ServiceSummary;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-06-30T23:46:28+0530",
+    date = "2026-08-22T22:01:56+0530",
     comments = "version: 1.6.3, compiler: javac, environment: Java 23 (Oracle Corporation)"
 )
 @Component
@@ -80,6 +80,7 @@ public class SalonMapperImpl implements SalonMapper {
         salonResponseV1.salonId( salon.getId() );
         salonResponseV1.address( mapAddress( salon ) );
         salonResponseV1.name( salon.getName() );
+        salonResponseV1.ownerId( salon.getOwnerId() );
         salonResponseV1.description( salon.getDescription() );
         salonResponseV1.phone( salon.getPhone() );
         salonResponseV1.email( salon.getEmail() );

@@ -5,3 +5,4 @@ com\umar\ApiGatewayApplication.class
 com\umar\filter\CorrelationIdFilter.class
 com\umar\util\JwtConstant.class
 com\umar\util\JwtUtil.class
+com\umar\config\CorsConfig.class

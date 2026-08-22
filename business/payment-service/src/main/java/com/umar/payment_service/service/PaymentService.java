@@ -15,7 +15,9 @@ import com.umar.payment_service.events.PaymentEventProducer;
 import com.umar.payment_service.exchange.BookingClient;
 import com.umar.payment_service.exchange.UserClient;
 import com.umar.payment_service.model.PaymentRecord;
+import com.umar.payment_service.model.PromoCodes;
 import com.umar.payment_service.repository.PaymentRepository;
+import com.umar.payment_service.repository.PromoCodeRepository;
 import com.umar.payment_service.serviceInterface.IPaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -34,6 +36,7 @@ public class PaymentService implements IPaymentService {
     private final PaymentEventProducer paymentEventProducer;
     private final ObjectMapper mapper;
     private final RazorpayWebhookVerifier verifier;
+    private final PromoCodeRepository promoCodeRepository;
 
 
 
@@ -49,12 +52,14 @@ public class PaymentService implements IPaymentService {
             throw new ApiException(HttpStatus.BAD_REQUEST,"ALREADY_EXISTS","Payment already exists");
         }
         if(request.getPromoCode()!=null){
-            //promo code validation and d discount
+           this.applyDiscount(request.getPromoCode(), bookingResponse);
         }
         FraudScoringRequest fraudScoringRequest = FraudScoringRequest.builder()
                 .bookingId(request.getBookingId())
                 .currency(request.getCurrency())
-                .amount(new BigDecimal(bookingResponse.getTotalPrice()))
+                .userId(userResponse.getUserId())
+                .amount(bookingResponse.getTotalPrice())
+                .amount(bookingResponse.getTotalPrice())
                 .paymentMethod(request.getPaymentMethod().name())
                 .build();
         paymentEventProducer.publishFraudScoringRequest(fraudScoringRequest);
@@ -174,6 +179,19 @@ public class PaymentService implements IPaymentService {
 //
 //        producer.publishPaymentFailed(payment);
 
+    }
+
+    private void  applyDiscount(String promoCodeStr, BookingResponseV1 bookingResponse){
+        PromoCodes promoCode = promoCodeRepository.findByPromoCode(promoCodeStr).orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST,"INVALID_PROMO_CODE","Invalid promo code"));
+        if(!promoCode.isPromoActiveAndNotExpired()){
+            throw new ApiException(HttpStatus.BAD_REQUEST,"INVALID_PROMO_CODE","Invalid promo code");
+        }
+        if(promoCode.getDiscountBasedOnFlag().equals("RATE")){
+            bookingResponse.setTotalPrice(bookingResponse.getTotalPrice().subtract(bookingResponse.getTotalPrice().multiply(promoCode.getDiscountAmountOrRate())));
+        }
+        else{
+            bookingResponse.setTotalPrice(bookingResponse.getTotalPrice().subtract(promoCode.getDiscountAmountOrRate()));
+        }
     }
 
 }

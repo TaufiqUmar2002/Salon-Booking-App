@@ -1,0 +1,218 @@
+services:
+
+  #eureka server
+
+  eureka-server:
+    build:
+      context: .
+      dockerfile: cloud/service-registry/Dockerfile
+    container_name: eureka-server
+    ports:
+      - "4001:4001"
+    networks:
+      - microservices-net
+    volumes:
+      - eureka_logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4001/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  #config server
+
+  config-server:
+    build:
+      context: .
+      dockerfile: cloud/config-server/Dockerfile
+    container_name: config-server
+    ports:
+      - "4002:4002"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - microservices-net
+    volumes:
+      - config_logs:/app/logs
+
+ #postgres user
+
+  postgres-db:
+    image: postgres:16
+    container_name: postgres-db
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: app_db
+    ports:
+      - "6001:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - microservices-net
+
+ #mongo-db
+  mongo-db:
+    image: mongo:7
+    container_name: mongo-db
+    restart: always
+    ports:
+      - "6002:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      microservices-net:
+
+  #mysql
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: app_db
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: app_password
+    ports:
+      - "6003:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      microservices-net:
+
+  #CATEGORY-SERVICE
+
+#  category-service:
+#    build:
+#      context: .
+#      dockerfile: business/category-service/Dockerfile
+#    container_name: category-service
+#    ports:
+#      - "5001:5001"
+#    depends_on:
+#      - mysql-db
+#      - eureka-server
+#    networks:
+#      microservices-net:
+
+  #Booking service
+
+#  booking-service:
+#    build:
+#      context: .
+#      dockerfile: business/booking-service/Dockerfile
+#    container_name: booking-service
+#    ports:
+#      - "5002:5002"
+#    depends_on:
+#      - mysql-db
+#      - eureka-server
+#    networks:
+#      microservices-net:
+
+  #paymnet Service
+
+#  payment-service:
+#    build:
+#      context: .
+#      dockerfile: business/payment-service/Dockerfile
+#    container_name: payment-service
+#    ports:
+#      - "5003:5003"
+#    depends_on:
+#      - postgres-db
+#      - eureka-server
+#    networks:
+#      microservices-net:
+
+  #salon-service
+#  salon-service:
+#    build:
+#      context: .
+#      dockerfile: business/salon-service/Dockerfile
+#    container_name: salon-service
+#    ports:
+#      - "5009:5009"
+#    depends_on:
+#      - postgres-db
+#      - eureka-server
+#    networks:
+#      microservices-net:
+
+  user-service:
+    build:
+      context: .
+      dockerfile: business/user-service/Dockerfile
+    container_name: user-service
+    ports:
+      - "7002:7002"
+      - "5105:5105"
+    environment:
+      JAVA_TOOL_OPTIONS: > #for debugging
+        -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5105
+    depends_on:
+      - mysql-db
+      - eureka-server
+    networks:
+      microservices-net:
+
+
+  #Service-Offering
+
+#  service-offering:
+#    build:
+#      context: .
+#      dockerfile: business/service-offering/Dockerfile
+#    container_name: service-offering
+#    ports:
+#      - "5004:5004"
+#    depends_on:
+#      - mysql-db
+#      - eureka-server
+#    networks:
+#      microservices-net:
+
+  #AI-ASSISTANT-SERVICE
+#  ai-assistant-service:
+#    build:
+#      context: .
+#      dockerfile: business/ai-assistant-service/Dockerfile
+#    container_name: ai-assistant-service
+#    ports:
+#      - "5005:5005"
+#    depends_on:
+#      - postgres-db
+#      - eureka-server
+#    networks:
+#      microservices-net:
+
+  #AI-RECOMMENDATION-SERVICE
+#  ai-recommendation-service:
+#    build:
+#      context: .
+#      dockerfile: business/ai-recommendation-service/Dockerfile
+#    container_name: ai-recommendation-service
+#    ports:
+#      - "5006:5006"
+#    depends_on:
+#      - postgres-db
+#      - eureka-server
+#    networks:
+#      microservices-net:
+#networks
+
+networks:
+  microservices-net:
+    driver: bridge
+
+#volumes
+
+volumes:
+  eureka_logs:
+  config_logs:
+  postgres-data:
+  mongo-data:
+  mysql-data:

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-07-04T20:51:46+0530",
+    date = "2026-08-22T21:56:34+0530",
     comments = "version: 1.6.3, compiler: javac, environment: Java 23 (Oracle Corporation)"
 )
 @Component
@@ -26,6 +26,7 @@ public class ServiceMapperImpl implements ServiceMapper {
 
         ServiceResponse.ServiceResponseBuilder serviceResponse = ServiceResponse.builder();
 
+        serviceResponse.currentPrice( serviceOffering.getPrice() );
         serviceResponse.serviceId( serviceOffering.getId() );
         serviceResponse.name( serviceOffering.getName() );
         serviceResponse.categoryId( serviceOffering.getCategoryId() );

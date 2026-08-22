@@ -9,7 +9,7 @@ spring:
 
   ai:
     openai:
-      api-key: {API_KEY}
+      api-key:  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
       base-url: https://integrate.api.nvidia.com
       chat:
         options:

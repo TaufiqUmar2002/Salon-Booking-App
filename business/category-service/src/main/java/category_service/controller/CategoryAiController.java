@@ -27,6 +27,6 @@ public class CategoryAiController {
     @PostMapping("/generate-description")
     public ResponseEntity<Suggestions> generateDescription(@RequestBody GenerateDescription request){
         Suggestions suggestions = this.categoryAiService.generateDescription(request);
-        return null;
+        return ResponseEntity.ok(suggestions);
     }
 }

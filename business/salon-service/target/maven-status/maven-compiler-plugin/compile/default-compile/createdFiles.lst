@@ -11,6 +11,7 @@ salon_service\service\SalonAiService$SalonSpecifications.class
 salon_service\event\SalonEventProducer.class
 salon_service\exchange\GlobalFeignErrorDecoder.class
 salon_service\repository\SalonRepository.class
+salon_service\audit\AuditorAwareImpl.class
 salon_service\model\OpeningHoursConverter.class
 salon_service\model\OpeningHoursConverter$1.class
 salon_service\repository\SalonAuditRepository.class

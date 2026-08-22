@@ -12,6 +12,7 @@ com\umar\exchange\SalonClient.class
 com\umar\serviceInterface\IReviewAiService.class
 com\umar\config\ReviewExecutorConfig.class
 com\umar\config\ReviewAiConfig.class
+com\umar\exchange\ServiceClient.class
 com\umar\audit\AuditorAwareImpl.class
 com\umar\mapper\ReviewMapper.class
 com\umar\service\ReviewService.class

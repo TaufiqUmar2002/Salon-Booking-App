@@ -85,7 +85,12 @@ public class JwtUtil {
     }
 
     public String extractUserEmail(String token) {
-        return extractClaims(token).getSubject();
+        try {
+            return extractClaims(token).getSubject();
+        }
+        catch (Exception e){
+            throw new ApiException(HttpStatus.UNAUTHORIZED, "INVALID_TOKEN", "user.jwt.invalidToken");
+        }
     }
 
     public boolean isTokenExpired(String token) {
