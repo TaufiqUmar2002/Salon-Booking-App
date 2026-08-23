@@ -18,6 +18,7 @@ public class SalonResponseV1 {
     private String name;
     private Long ownerId;
     private String description;
+    private String city;
     private Long category;
     private String address;
     private String phone;

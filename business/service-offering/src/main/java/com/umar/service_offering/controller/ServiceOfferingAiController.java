@@ -24,6 +24,7 @@ public class ServiceOfferingAiController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('SALON_OWNER')")
     @PostMapping("/describe")
     public ResponseEntity<AiDescribeResponse> describe(@Valid @RequestBody AiServiceDescribe aiServiceDescribe){
         AiDescribeResponse describeResponse = this.aiService.describe(aiServiceDescribe);
@@ -42,9 +43,10 @@ public class ServiceOfferingAiController {
         return ResponseEntity.ok(aiBulDescribeResponse);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/performance/{salonId}")
-    public ResponseEntity<AiServicePerformance> performance(@PathVariable Long salonId){
-        AiServicePerformance aiServicePerformance = this.aiService.performance(salonId);
+    public ResponseEntity<AiServicePerformance> performance(@PathVariable Long salonId,@RequestParam(required = false) Integer periodDays, @RequestParam(required = false) Integer topN){
+        AiServicePerformance aiServicePerformance = this.aiService.performance(salonId,periodDays,topN);
         return ResponseEntity.ok(aiServicePerformance);
     }
 }

@@ -12,11 +12,16 @@ import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface ServiceOfferingRepository extends JpaRepository<ServiceOffering,Long> {
 
-    Set<ServiceOffering> findBySalonId(Long salonId);
+
+    @Query("""
+    select so from ServiceOffering so where so.salonId=:salonId and (so.description is not null or so.description != '')
+    """)
+    Optional<List<ServiceOffering>> findBySalonIdAndDescriptionNotNull(Long salonId);
 
     @Query("""
     select so from ServiceOffering so where so.salonId=:salonId and so.categoryId=:categoryId

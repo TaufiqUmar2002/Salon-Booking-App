@@ -26,6 +26,7 @@
         <module>cloud</module>
         <module>common-lib</module>
         <module>common-security</module>
+        <module>common-api-logging</module>
     </modules>
 
     <properties>

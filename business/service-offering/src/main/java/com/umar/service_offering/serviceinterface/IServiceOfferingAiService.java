@@ -14,5 +14,5 @@ public interface IServiceOfferingAiService {
 
     AiBulDescribeResponse bulkDescribe(Long salonId, AiBulkDescribeRequest aiBulkDescribeRequest);
 
-    AiServicePerformance performance(Long salonId);
+    AiServicePerformance performance(Long salonId,Integer periodDays, Integer topN);
 }
