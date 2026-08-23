@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<Review,Long> {
@@ -17,4 +18,10 @@ public interface ReviewRepository extends JpaRepository<Review,Long> {
     Integer getReviewByBookingId(@Param("bookingId") Long bookingId);
 
     List<Review> findBySalonId(Long salonId);
+
+    @Query("""
+    SELECT r FROM Review r where r.salonId =:salonId and r.isVisible = false and r.isDeleted = false
+    and r.sentimentLabel is not null and r.isSpam = false LIMIT :maxReviews
+    """)
+    Optional<List<Review>> findBySalonIdAndIsVisibleFalse(Long reviewId,Integer maxReviews);
 }

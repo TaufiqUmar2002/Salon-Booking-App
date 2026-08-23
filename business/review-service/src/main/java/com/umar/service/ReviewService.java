@@ -49,16 +49,7 @@ public class ReviewService implements IReviewService {
     @Override
     public ReviewResponse createReview(CreateReviewRequest request) {
         BookingResponseV1 bookingResponse = bookingClient.getBookingById(request.getBookingId());
-        UserValidateResponse response = this.userClient.getUserValidation();
-        if(!bookingResponse.getSalonId().equals(request.getSalonId())){
-            throw new ApiException(HttpStatus.BAD_REQUEST,"SALON_MISMATCH","review.salonMismatch");
-        }
-        if(!bookingResponse.getStatus().equals(BookingStatus.COMPLETED)){
-            throw new ApiException(HttpStatus.BAD_REQUEST,"BOOKING_NOT_COMPLETED","review.bookingNotCompleted");
-        }
-        if(bookingResponse.getUserId().equals(response.getUserId())){
-            throw new ApiException(HttpStatus.FORBIDDEN,"FORBIDDEN","review.youCanOnlyReviewYourOwnBookings");
-        }
+        UserValidateResponse response = getUserValidateResponse(request, bookingResponse);
         Integer reviewExistsWithGivenBooking = repository.getReviewByBookingId(request.getBookingId());
         if(reviewExistsWithGivenBooking>0){
             throw new ApiException(HttpStatus.CONFLICT,"REVIEW_EXISTS","review.alreadyExists");
@@ -81,6 +72,20 @@ public class ReviewService implements IReviewService {
             eventProducer.publishCreateReviewEvent(eventRequest);
         });
         return mapper.toResponse(persistReview)  ;
+    }
+
+    private UserValidateResponse getUserValidateResponse(CreateReviewRequest request, BookingResponseV1 bookingResponse) {
+        UserValidateResponse response = this.userClient.getUserValidation();
+        if(!bookingResponse.getSalonId().equals(request.getSalonId())){
+            throw new ApiException(HttpStatus.BAD_REQUEST,"SALON_MISMATCH","review.salonMismatch");
+        }
+        if(!bookingResponse.getStatus().equals(BookingStatus.COMPLETED)){
+            throw new ApiException(HttpStatus.BAD_REQUEST,"BOOKING_NOT_COMPLETED","review.bookingNotCompleted");
+        }
+        if(bookingResponse.getUserId().equals(response.getUserId())){
+            throw new ApiException(HttpStatus.FORBIDDEN,"FORBIDDEN","review.youCanOnlyReviewYourOwnBookings");
+        }
+        return response;
     }
 
     @Override
