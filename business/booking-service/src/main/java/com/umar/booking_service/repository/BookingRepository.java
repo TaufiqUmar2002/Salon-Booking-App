@@ -42,4 +42,9 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
       SELECT b FROM Booking b where b.salonId=:salonId
 """)
     List<Booking> getBookingBySalonId(Long salonId);
+
+    @Query("""
+      SELECT b FROM Booking b where b.userId=:userId and b.status in (:activeStatus)
+""")
+    List<Booking> findBookingByUserId(Long userId,BookingStatus activeStatus);
 }

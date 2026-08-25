@@ -3,6 +3,10 @@ package com.umar.booking_service.serviceinterface;
 import com.umar.payload.request.booking.*;
 import com.umar.payload.response.booking.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
 public interface IBookingService {
 
     BookingResponse createBooking(BookingRequest request);
@@ -16,5 +20,6 @@ public interface IBookingService {
     BookingResponse noShowBooking(Long id);
     BookingSummaryResponse salonSummary(Long salonId);
     UserBookingResponse getBookingByCategory(Long categoryId);
+    List<LocalDateTime> generateAllPossibleSlots(LocalDate targetDate, String businessHoursStr, int durationMinutes);
 
 }

@@ -386,6 +386,7 @@ public class BookingService implements IBookingService {
         return !appointmentTime.isBefore(openingTime) && !appointmentTime.isAfter(closingTime);
     }
 
+    @Override
     public List<LocalDateTime> generateAllPossibleSlots(LocalDate targetDate, String businessHoursStr, int durationMinutes) {
         List<LocalDateTime> possibleSlots = new ArrayList<>();
         if(businessHoursStr==null){
