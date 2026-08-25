@@ -1,0 +1,13 @@
+
+
+server:
+  port: 7002
+
+spring:
+  application:
+    name: EOD-BOD-SERVICE
+
+data:
+  redis:
+    host: localhost
+    port: 6379
